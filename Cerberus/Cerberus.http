@@ -1,0 +1,6 @@
+@Cerberus_HostAddress = http://localhost:5058
+
+GET {{Cerberus_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
