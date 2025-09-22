@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cerberus.Api", "Cerberus\Cerberus.Api.csproj", "{C48DF951-49FE-3186-F815-C501628CD478}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cerberus.Api", "Cerberus.Api\Cerberus.Api.csproj", "{C48DF951-49FE-3186-F815-C501628CD478}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cerberus.AppHost", "Cerberus.AppHost\Cerberus.AppHost.csproj", "{1B16CACC-56F3-4EA3-8091-E0C46F774193}"
 EndProject
