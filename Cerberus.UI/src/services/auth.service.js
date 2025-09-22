@@ -1,24 +1,11 @@
-import { apiService } from './api.service';
-
 const authService = {
-    login(returnUrl = window.location.href) {
+    login() {
         const baseUrl = process.env.VUE_APP_API_URL || 'http://localhost:5000/api';
+        // Use window.location.href to get the full current URL
+        const currentUrl = window.location.href;
+        // If we're not already on the character page, set it as the return URL
+        const returnUrl = currentUrl.includes('/character') ? currentUrl : `${window.location.origin}/character`;
         window.location.href = `${baseUrl}/Authentication/login?returnUrl=${encodeURIComponent(returnUrl)}`;
-    },
-
-    async isAuthenticated() {
-        try {
-            // Make a call to check authentication status
-            await apiService.get('Authentication/status');
-            return true;
-        } catch (error) {
-            if (error.response && error.response.status === 401) {
-                return false;
-            }
-            // If there's a different error, assume not authenticated
-            console.error('Auth check error:', error);
-            return false;
-        }
     }
 };
 
