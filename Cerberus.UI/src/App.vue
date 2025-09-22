@@ -7,6 +7,7 @@
       <nav>
         <router-link to="/" class="nav-link">Home</router-link>
         <router-link to="/assets" class="nav-link">Assets</router-link>
+        <router-link to="/character" class="nav-link">Character</router-link>
       </nav>
     </div>
     <div class="main-content">

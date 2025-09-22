@@ -1,22 +1,23 @@
 import { apiService } from './api.service';
 
 const authService = {
-    async login() {
+    login(returnUrl = window.location.href) {
+        const baseUrl = process.env.VUE_APP_API_URL || 'http://localhost:5000/api';
+        window.location.href = `${baseUrl}/Authentication/login?returnUrl=${encodeURIComponent(returnUrl)}`;
+    },
+
+    async isAuthenticated() {
         try {
-            console.log('AuthService: Initiating login flow');
-            const response = await apiService.get('Authentication/login');
-            console.log('AuthService: Login response received');
-            
-            // Since this is an OIDC flow, it will handle redirects automatically
-            // If we get a response, it might contain a redirect URL
-            if (response?.url) {
-                window.location.href = response.url;
-            }
-            
-            return response;
+            // Make a call to check authentication status
+            await apiService.get('Authentication/status');
+            return true;
         } catch (error) {
-            console.error('AuthService: Login error:', error);
-            throw error;
+            if (error.response && error.response.status === 401) {
+                return false;
+            }
+            // If there's a different error, assume not authenticated
+            console.error('Auth check error:', error);
+            return false;
         }
     }
 };

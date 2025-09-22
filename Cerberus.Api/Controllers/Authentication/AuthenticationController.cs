@@ -14,14 +14,14 @@ namespace Cerberus.Api.Controllers.Authentication
         /// <param name="returnUrl">The redirect url to navigate to once login completes.</param>
         /// <returns></returns>
         [HttpGet("login")]
-        public IActionResult Login(string returnUrl = "/api/esi/assets")
+        public IActionResult Login([FromQuery] string returnUrl = "/character")
         {
-            // Kick off OIDC challenge (redirects to EVE SSO)
-            return Challenge(new AuthenticationProperties 
-            { 
+            return Challenge(new AuthenticationProperties
+            {
                 RedirectUri = returnUrl
             }, "EveSSO");
         }
+
 
         /// <summary>
         /// Log out.

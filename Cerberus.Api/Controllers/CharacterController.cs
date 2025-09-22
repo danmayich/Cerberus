@@ -16,7 +16,7 @@ namespace Cerberus.Api.Controllers.Authentication
         /// </summary>
         /// <returns></returns>
         [Authorize]
-        [HttpGet("character")]
+        [HttpGet()]
         public async Task<CharacterDto> GetCharacter()
         {
             var (charId, accessToken, refreshToken) = GetTokens();

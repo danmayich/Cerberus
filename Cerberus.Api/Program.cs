@@ -1,4 +1,3 @@
-
 using Cerberus.Application;
 using Cerberus.Application.Assets;
 using Cerberus.Services;
@@ -20,6 +19,17 @@ public class Program
         builder.AddServiceDefaults();
 
         // Add services to the container.
+
+        // Add CORS policy
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+        });
 
         var settings = new CerberusSettings()
         {
@@ -118,6 +128,9 @@ public class Program
         }
 
         app.UseHttpsRedirection();
+
+        // Add CORS middleware
+        app.UseCors();
 
         app.UseAuthorization();
 

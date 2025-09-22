@@ -31,18 +31,11 @@ export default {
     }
   },
   methods: {
-    async handleLogin() {
-      this.isLoading = true
-      this.error = null
-      
-      try {
-        await authService.login()
-      } catch (err) {
-        this.error = 'Failed to initiate login: ' + err.message
-        console.error('Login error:', err)
-      } finally {
-        this.isLoading = false
-      }
+    handleLogin() {
+      this.isLoading = true;
+      // Simply redirect to the login endpoint
+      authService.login();
+      // No need for error handling here as we're doing a direct navigation
     }
   }
 }
