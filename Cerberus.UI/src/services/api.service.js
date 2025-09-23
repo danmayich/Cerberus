@@ -3,49 +3,74 @@ import axios from 'axios';
 class ApiService {
   constructor() {
     this.axios = axios.create({
-      baseURL: process.env.VUE_APP_API_URL || 'http://localhost:5000/api',
+      baseURL: process.env.VUE_APP_API_URL,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
-      }
+        'Accept': 'application/json'
+      },
+      withCredentials: true,  // This enables sending cookies with requests
+      maxRedirects: 0  // Prevent axios from following redirects automatically
     });
 
     // Add request interceptor
     this.axios.interceptors.request.use(
       (config) => {
-        // You can add auth tokens here if needed
-        // const token = getToken();
-        // if (token) {
-        //   config.headers.Authorization = `Bearer ${token}`;
-        // }
-        console.log('API Request:', {
-          method: config.method,
-          url: config.url,
-          baseURL: config.baseURL,
-          data: config.data,
-          params: config.params
-        });
+        console.group('API Request Details');
+        console.log('Full URL:', config.baseURL + '/' + config.url);
+        console.log('Method:', config.method?.toUpperCase());
+        console.log('Headers:', config.headers);
+        if (config.data) console.log('Request Body:', config.data);
+        if (config.params) console.log('Query Params:', config.params);
+        console.log('Cookies Enabled:', config.withCredentials);
+        console.groupEnd();
         return config;
       },
       (error) => {
-        console.error('API Request Error:', error);
+        console.group('API Request Error');
+        console.error('Error:', error);
+        console.error('Error Message:', error.message);
+        console.groupEnd();
         return Promise.reject(error);
       }
     );
 
     // Add response interceptor
     this.axios.interceptors.response.use(
-      (response) => response.data,
+      (response) => {
+        console.group('API Response Success');
+        console.log('Status:', response.status);
+        console.log('Headers:', response.headers);
+        console.log('Response Data:', response.data);
+        console.groupEnd();
+        return response.data;
+      },
       (error) => {
-        // Handle specific error cases here
+        console.group('API Response Error');
+        console.error('Error:', error);
+        
         if (error.response) {
-          // Server responded with error
+          console.log('Status:', error.response.status);
+          console.log('Headers:', error.response.headers);
+          console.log('Response Data:', error.response.data);
+          
+          if (error.response.status === 302 || error.response.status === 401) {
+            const redirectUrl = error.response.headers?.location;
+            console.log('Redirect URL:', redirectUrl);
+            
+            if (redirectUrl && redirectUrl.includes('Authentication/login')) {
+              console.log('Authentication redirect detected');
+              // For OIDC redirects, navigate the whole page
+              if (redirectUrl.includes('/Authentication/login')) {
+                window.location.href = redirectUrl;
+                return new Promise(() => {}); // Prevent further error handling
+              }
+            }
+          }
           console.error('API Error:', error.response.data);
         } else if (error.request) {
-          // Request made but no response
           console.error('Network Error:', error.request);
         } else {
-          // Other errors
           console.error('Error:', error.message);
         }
         return Promise.reject(error);

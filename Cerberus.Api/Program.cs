@@ -20,14 +20,22 @@ public class Program
 
         // Add services to the container.
 
-        // Add CORS policy
+        // Allowed frontend origins (adjust ports to match where your Vue dev server runs)
+        var allowedOrigins = new[] {
+    "http://localhost:8080",    // Vue dev server (adjust if different)
+    "https://localhost:44328",  // IIS Express (if you run via IIS Express)
+    "https://localhost:7283"    // Project https port (if you run via dotnet run)
+};
+
+        // CORS: named policy that allows credentials
         builder.Services.AddCors(options =>
         {
-            options.AddDefaultPolicy(policy =>
+            options.AddPolicy("CorsPolicy", policy =>
             {
-                policy.AllowAnyOrigin()
+                policy.WithOrigins(allowedOrigins)
                       .AllowAnyHeader()
-                      .AllowAnyMethod();
+                      .AllowAnyMethod()
+                      .AllowCredentials();
             });
         });
 
@@ -57,7 +65,13 @@ public class Program
             options.DefaultScheme = "Cookies";
             options.DefaultChallengeScheme = "EveSSO";
         })
-        .AddCookie("Cookies")
+        .AddCookie("Cookies", options =>
+        {
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.SameSite = SameSiteMode.None; // allow cross-site
+                                                         // other options...
+        })
         .AddOAuth("EveSSO", options =>
         {
             //options.Authority = "https://login.eveonline.com";
@@ -120,6 +134,18 @@ public class Program
 
         app.MapDefaultEndpoints();
 
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Method == HttpMethods.Options)
+            {
+                context.Response.StatusCode = StatusCodes.Status204NoContent;
+                await context.Response.CompleteAsync();
+                return;
+            }
+
+            await next();
+        });
+
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
@@ -129,9 +155,11 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseRouting();
         // Add CORS middleware
-        app.UseCors();
+        app.UseCors("CorsPolicy");
 
+        app.UseAuthentication();
         app.UseAuthorization();
 
 
