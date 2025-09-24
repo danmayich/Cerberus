@@ -1,7 +1,6 @@
 ﻿using Cerberus.Application.Assets;
 using Cerberus.Dto;
 using Cerberus.Services.Data;
-using System.Data;
 
 namespace Cerberus.Application
 {
@@ -12,23 +11,65 @@ namespace Cerberus.Application
             var character = characterRepository.GetById(id);
 
             // Only update info once an hour
-            if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
-            {
+            //if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
+            //{
                 character.Assets = await assetRetrievalApplication.GetAssets(id, accessToken);
 
-                
                 var walletTransactions = await walletApplication.GetTransactions(id, accessToken);
                 ReconcileWallet(character, walletTransactions);
 
                 GroupTransactionsByItem(character);
 
+                var assetNamesDict = ParseCsvToDictionary();
+
+                HashSet<long> itemIds = new HashSet<long>();
+                foreach (var transactionGroup in character.TransactionGroups)
+                {
+                    transactionGroup.Value.ItemName = assetNamesDict[transactionGroup.Key];
+                }
+
                 UpdateTotalAssetQuantities(character);
-            }
+
+                foreach (var transactionGroup in character.TransactionGroups)
+                {
+                    var orders = await assetRetrievalApplication.GetMarketOrderDtosAsync(accessToken, transactionGroup.Key.ToString());
+
+                    if (orders != null)
+                    {
+                        transactionGroup.Value.TotalAssetValue = (orders.Price * transactionGroup.Value.TotalTrackedQuantity);
+                    }
+
+                }
+
+          // }
 
             characterRepository.Save(character);
 
             return character;
         }
+
+
+        /// <summary>
+        /// This is ass
+        /// </summary>
+        public Dictionary<long, string> ParseCsvToDictionary()
+        {
+            var result = new Dictionary<long, string>();
+
+            foreach (var line in File.ReadLines(@"C:\test\esi\typeids.csv"))
+            {
+                // Remove surrounding quotes and split by comma
+                var parts = line.Split(',').Select(p => p.Trim('"')).ToArray();
+
+                if (parts.Length >= 2 && long.TryParse(parts[0], out long key))
+                {
+                    result[key] = parts[1];
+                }
+            }
+
+            return result;
+        }
+
 
         /// <summary>
         ///  TODO should be in domain logic
@@ -54,22 +95,26 @@ namespace Cerberus.Application
 
             foreach (var transaction in character.WalletTransactions)
             {
-                var typeId = transaction.Value.TypeId;
-
-                if (character.TransactionGroups.ContainsKey(typeId))
+                // We only want to track our buy
+                // This _should_ cover buying from sell orders and putting in buy orders
+                if (transaction.Value.IsBuy)
                 {
-                    character.TransactionGroups[typeId].TotalTrackedQuantity += transaction.Value.Quantity;
-                    character.TransactionGroups[typeId].TotalTrackedAssetPrice += (transaction.Value.UnitPrice * transaction.Value.Quantity);
-                    character.TransactionGroups[typeId].AverageTrackedPrice = (character.TransactionGroups[typeId].TotalTrackedAssetPrice / character.TransactionGroups[typeId].TotalTrackedQuantity);
-                }
-                else
-                {
-                    character.TransactionGroups.Add(typeId, new TransactionGroup()
+                    var typeId = transaction.Value.TypeId;
+                    if (character.TransactionGroups.ContainsKey(typeId))
                     {
-                        TotalTrackedQuantity = transaction.Value.Quantity,
-                        TotalTrackedAssetPrice = transaction.Value.UnitPrice * transaction.Value.Quantity,
-                        AverageTrackedPrice = transaction.Value.UnitPrice / transaction.Value.Quantity
-                    });
+                        character.TransactionGroups[typeId].TotalTrackedQuantity += transaction.Value.Quantity;
+                        character.TransactionGroups[typeId].TotalTrackedAssetPrice += (transaction.Value.UnitPrice * transaction.Value.Quantity);
+                        character.TransactionGroups[typeId].AverageTrackedPrice = (character.TransactionGroups[typeId].TotalTrackedAssetPrice / character.TransactionGroups[typeId].TotalTrackedQuantity);
+                    }
+                    else
+                    {
+                        character.TransactionGroups.Add(typeId, new TransactionGroup()
+                        {
+                            TotalTrackedQuantity = transaction.Value.Quantity,
+                            TotalTrackedAssetPrice = transaction.Value.UnitPrice * transaction.Value.Quantity,
+                            AverageTrackedPrice = (transaction.Value.UnitPrice * transaction.Value.Quantity) / transaction.Value.Quantity
+                        });
+                    }
                 }
             }
         }
@@ -83,6 +128,18 @@ namespace Cerberus.Application
                     character.TransactionGroups[asset.TypeId].TotalQuantity += asset.Quantity;
                 }
             }
+
+
+            var itemsGreaterThan0 = new Dictionary<long, TransactionGroup>();
+            foreach (var transactionGroup in character.TransactionGroups)
+            {
+                if (transactionGroup.Value.TotalQuantity > 0)
+                {
+                    itemsGreaterThan0.Add(transactionGroup.Key, transactionGroup.Value);
+                }
+            }
+
+            character.TransactionGroups = itemsGreaterThan0;
         }
     }
 }

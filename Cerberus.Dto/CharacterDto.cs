@@ -34,6 +34,11 @@ namespace Cerberus.Dto
     public class TransactionGroup
     {
         /// <summary>
+        /// Name of the asset.
+        /// </summary>
+        public string ItemName { get; set; } = string.Empty;
+
+        /// <summary>
         /// Total number of these items you have, even before tracking began.
         /// </summary>
         public long TotalQuantity { get; set; }
@@ -53,6 +58,9 @@ namespace Cerberus.Dto
         /// </summary>
         public decimal TotalTrackedAssetPrice { get; set; }
 
+        /// <summary>
+        /// Total current value of the asset including tracked and not tracked.
+        /// </summary>
         public decimal TotalAssetValue { get; set; }
     }
 }
