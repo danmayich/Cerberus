@@ -20,34 +20,50 @@ namespace Cerberus.Application
 
                 GroupTransactionsByItem(character);
 
-                var assetNamesDict = ParseCsvToDictionary();
-
-                HashSet<long> itemIds = new HashSet<long>();
-                foreach (var transactionGroup in character.TransactionGroups)
-                {
-                    transactionGroup.Value.ItemName = assetNamesDict[transactionGroup.Key];
-                }
+                AddItemNamesToTransactionGroups(character);
 
                 UpdateTotalAssetQuantities(character);
 
-                foreach (var transactionGroup in character.TransactionGroups)
-                {
-                    var orders = await assetRetrievalApplication.GetMarketOrderDtosAsync(accessToken, transactionGroup.Key.ToString());
-
-                    if (orders != null)
-                    {
-                        transactionGroup.Value.TotalAssetValue = (orders.Price * transactionGroup.Value.TotalTrackedQuantity);
-                    }
-
-                }
-
-          // }
+                await UpdateTotalTrackedAssetValue(character, accessToken);
+            //}
 
             characterRepository.Save(character);
 
             return character;
         }
 
+        private async Task UpdateTotalTrackedAssetValue(CharacterDto character, string accessToken)
+        {
+            foreach (var transactionGroup in character.TransactionGroups)
+            {
+                var order = await assetRetrievalApplication.GetMarketOrderDtosAsync(accessToken, transactionGroup.Key.ToString());
+
+                if (order != null)
+                {
+                    long multiplierToUse = transactionGroup.Value.TotalTrackedQuantity;
+                    if (transactionGroup.Value.TotalQuantity < transactionGroup.Value.TotalTrackedQuantity)
+                    {
+                        multiplierToUse = transactionGroup.Value.TotalQuantity;
+                    }
+
+                    transactionGroup.Value.TotalAssetValue = (order.Price * multiplierToUse);
+                }
+            }
+        }
+
+        private void AddItemNamesToTransactionGroups(CharacterDto character)
+        {
+            var assetNamesDict = ParseCsvToDictionary();
+            foreach (var transactionGroup in character.TransactionGroups)
+            {
+                transactionGroup.Value.ItemName = assetNamesDict[transactionGroup.Key];
+            }
+
+            foreach (var walletTransaction in character.WalletTransactions)
+            {
+                walletTransaction.Value.ItemName = assetNamesDict[walletTransaction.Value.TypeId];
+            }
+        }
 
         /// <summary>
         /// This is ass
@@ -95,11 +111,13 @@ namespace Cerberus.Application
 
             foreach (var transaction in character.WalletTransactions)
             {
+                var typeId = transaction.Value.TypeId;
+
                 // We only want to track our buy
                 // This _should_ cover buying from sell orders and putting in buy orders
                 if (transaction.Value.IsBuy)
                 {
-                    var typeId = transaction.Value.TypeId;
+                    
                     if (character.TransactionGroups.ContainsKey(typeId))
                     {
                         character.TransactionGroups[typeId].TotalTrackedQuantity += transaction.Value.Quantity;
@@ -114,6 +132,14 @@ namespace Cerberus.Application
                             TotalTrackedAssetPrice = transaction.Value.UnitPrice * transaction.Value.Quantity,
                             AverageTrackedPrice = (transaction.Value.UnitPrice * transaction.Value.Quantity) / transaction.Value.Quantity
                         });
+                    }
+                }
+                else
+                {
+                    // Is sell?
+                    if (character.TransactionGroups.ContainsKey(typeId))
+                    {
+
                     }
                 }
             }

@@ -9,6 +9,8 @@ namespace Cerberus.Dto
 {
     public class EsiWalletTransaction
     {
+        public string ItemName { get; set; } = string.Empty;
+
         [JsonPropertyName("transaction_id")]
         public long TransactionId { get; set; }
 

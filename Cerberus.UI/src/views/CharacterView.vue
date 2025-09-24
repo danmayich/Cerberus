@@ -54,21 +54,12 @@
           <span class="toggle-icon">{{ sectionStates.walletTransactions ? '▼' : '▶' }}</span>
         </div>
         <div v-show="sectionStates.walletTransactions" class="section-content">
-          <div class="table-container" v-if="Object.keys(character.walletTransactions).length > 0">
-            <table>
-              <thead>
-                <tr>
-                  <th>Transaction ID</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(transaction, id) in character.walletTransactions" :key="id">
-                  <td>{{ id }}</td>
-                  <td>{{ JSON.stringify(transaction) }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div v-if="Object.keys(character.walletTransactions).length > 0" class="wallet-transactions-container">
+            <WalletTransactionDetails
+              v-for="(transaction, id) in character.walletTransactions"
+              :key="id"
+              :transaction="transaction"
+            />
           </div>
           <p v-else>No wallet transactions found</p>
         </div>
@@ -98,11 +89,13 @@
 <script>
 import characterService from '../services/character.service'
 import TransactionGroupDetails from '../components/TransactionGroupDetails.vue'
+import WalletTransactionDetails from '../components/WalletTransactionDetails.vue'
 
 export default {
   name: 'CharacterView',
   components: {
-    TransactionGroupDetails
+    TransactionGroupDetails,
+    WalletTransactionDetails
   },
   data() {
     return {
@@ -226,5 +219,11 @@ tr:hover {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.wallet-transactions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 </style>
