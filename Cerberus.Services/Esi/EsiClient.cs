@@ -118,6 +118,8 @@ namespace Cerberus.Services.Esi
 
         public Task<EsiAsset[]> GetCharacterAssetsAsync(long characterId, string accessToken) => GetPagedAsync<EsiAsset>($"https://esi.evetech.net/latest/characters/{characterId}/assets/", accessToken);
 
+        public Task<WalletJournalEntry[]> GetCharacterWalletJournal(long characterId, string accessToken) => GetPagedAsync<WalletJournalEntry>($"https://esi.evetech.net/characters/{characterId}/wallet/journal", accessToken);
+
         /// <summary>
         /// This ESI end point seems broken all the responses just say "Name None"
         /// </summary>

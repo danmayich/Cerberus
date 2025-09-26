@@ -29,6 +29,8 @@ namespace Cerberus.Dto
         public Dictionary<long, EsiWalletTransaction> WalletTransactions { get; set; } = new Dictionary<long, EsiWalletTransaction>();
 
         public Dictionary<long, TransactionGroup> TransactionGroups { get; set; } = new Dictionary<long, TransactionGroup>();
+
+        public Dictionary<long, WalletJournalEntry> WalletJournalEntries { get; set; } = new Dictionary<long, WalletJournalEntry>();
     }
 
     public class TransactionGroup

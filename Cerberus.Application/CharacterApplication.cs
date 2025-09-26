@@ -18,6 +18,9 @@ namespace Cerberus.Application
                 var walletTransactions = await walletApplication.GetTransactions(id, accessToken);
                 ReconcileWallet(character, walletTransactions);
 
+                var walletJournalEntries = await walletApplication.GetWalleyJournalEntries(id, accessToken);
+                ReconcileWalletJourneyTransactions(character, walletJournalEntries.ToList());
+
                 GroupTransactionsByItem(character);
 
                 AddItemNamesToTransactionGroups(character);
@@ -90,9 +93,12 @@ namespace Cerberus.Application
         /// <summary>
         ///  TODO should be in domain logic
         /// </summary>
-        private void ReconcileWallet(CharacterDto character, List<EsiWalletTransaction> walletTransactions)
+        private void ReconcileWallet(CharacterDto character, List<EsiWalletTransaction> latestWalletTransactions)
         {
-            foreach (var transaction in walletTransactions)
+            // Order the new transactions by date desc
+            latestWalletTransactions = latestWalletTransactions.OrderByDescending(order => order.Date).ToList();
+
+            foreach (var transaction in latestWalletTransactions)
             {
                 if (!character.WalletTransactions.ContainsKey(transaction.TransactionId))
                 {
@@ -100,6 +106,24 @@ namespace Cerberus.Application
                 }
             }
         }
+
+        /// <summary>
+        ///  TODO should be in domain logic
+        /// </summary>
+        private void ReconcileWalletJourneyTransactions(CharacterDto character, List<WalletJournalEntry> latestWalletTransactions)
+        {
+            // Order the new transactions by date desc
+            latestWalletTransactions = latestWalletTransactions.OrderByDescending(order => order.Date).ToList();
+
+            foreach (var transaction in latestWalletTransactions)
+            {
+                if (!character.WalletJournalEntries.ContainsKey(transaction.Id))
+                {
+                    character.WalletJournalEntries.Add(transaction.Id, transaction);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Group all of our transactions by item time and calculate the tracked value.
@@ -117,7 +141,6 @@ namespace Cerberus.Application
                 // This _should_ cover buying from sell orders and putting in buy orders
                 if (transaction.Value.IsBuy)
                 {
-                    
                     if (character.TransactionGroups.ContainsKey(typeId))
                     {
                         character.TransactionGroups[typeId].TotalTrackedQuantity += transaction.Value.Quantity;
@@ -136,7 +159,7 @@ namespace Cerberus.Application
                 }
                 else
                 {
-                    // Is sell?
+                    // Is sell
                     if (character.TransactionGroups.ContainsKey(typeId))
                     {
 
