@@ -107,7 +107,7 @@
 </template>
 
 <script>
-import characterService from '../services/character.service'
+import { useCharacterStore } from '../stores/character'
 import TransactionGroupDetails from '../components/TransactionGroupDetails.vue'
 import WalletTransactionDetails from '../components/WalletTransactionDetails.vue'
 
@@ -117,16 +117,28 @@ export default {
     TransactionGroupDetails,
     WalletTransactionDetails
   },
+  setup() {
+    const characterStore = useCharacterStore()
+    return { characterStore }
+  },
   data() {
     return {
-      character: null,
-      loading: false,
-      error: null,
       sectionStates: {
         assets: false,
         walletTransactions: false,
         transactionGroups: false
       }
+    }
+  },
+  computed: {
+    character() {
+      return this.characterStore.character
+    },
+    loading() {
+      return this.characterStore.loading
+    },
+    error() {
+      return this.characterStore.error
     }
   },
   methods: {
@@ -137,17 +149,7 @@ export default {
       return new Date(dateString).toLocaleString()
     },
     async fetchCharacterData() {
-      this.loading = true
-      this.error = null
-      
-      try {
-        this.character = await characterService.getCharacter()
-      } catch (err) {
-        this.error = 'Failed to load character data: ' + err.message
-        console.error('Character loading error:', err)
-      } finally {
-        this.loading = false
-      }
+      await this.characterStore.fetchCharacter()
     }
   },
   created() {
