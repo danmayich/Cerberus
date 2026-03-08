@@ -2,7 +2,7 @@
   <div class="home">
     <h1>Home</h1>
     
-    <div class="login-container">
+    <div v-if="!authStore.isAuthenticated" class="login-container">
       <button 
         @click="handleLogin" 
         class="login-button"
@@ -20,9 +20,14 @@
 
 <script>
 import authService from '../services/auth.service'
+import { useAuthStore } from '../stores/auth'
 
 export default {
   name: 'HomeView',
+  setup() {
+    const authStore = useAuthStore()
+    return { authStore }
+  },
   data() {
     return {
       isLoading: false,
