@@ -47,16 +47,14 @@
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
-                  <th>Type</th>
+                  <th>Name</th>
                   <th>Location</th>
                   <th>Quantity</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="asset in character.assets" :key="asset.id">
-                  <td>{{ asset.id }}</td>
-                  <td>{{ asset.type }}</td>
+                  <td>{{ asset.name || asset.id }}</td>
                   <td>{{ asset.location }}</td>
                   <td>{{ asset.quantity }}</td>
                 </tr>

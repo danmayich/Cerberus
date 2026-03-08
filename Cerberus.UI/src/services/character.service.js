@@ -18,10 +18,11 @@ function convertKeysToCamel(obj) {
 }
 
 function mapAssetForView(asset) {
-    // asset fields from API: item_id, type_id, location_id, location_type, quantity, is_singleton, is_blueprint_copy, location_flag
-    // view expects: id, type, location, quantity
+    // asset fields from API: item_id, type_id, location_id, location_type, quantity, is_singleton, is_blueprint_copy, location_flag, item_name
+    // view expects: id, name, type, location, quantity
     return {
         id: asset.itemId ?? asset.item_id ?? asset.id,
+        name: asset.itemName ?? asset.item_name ?? null,
         type: asset.typeId ?? asset.type_id ?? asset.type,
         location: asset.locationId ?? asset.location_id ?? asset.location ?? `${asset.location_type || ''} ${asset.location_id || ''}`.trim(),
         quantity: asset.quantity ?? 0,

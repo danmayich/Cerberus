@@ -32,5 +32,10 @@ namespace Cerberus.Dto
 
         [JsonPropertyName("location_flag")]
         public string LocationFlag { get; set; } = "";
+
+        /// <summary>
+        /// TODO move this to another class since it's not from ESI>?
+        /// </summary>
+        public string ItemName { get; set; }
     }
 }

@@ -27,6 +27,26 @@ namespace Cerberus.Application
 
                 character.Assets = await assetRetrievalApplication.GetAssets(id, accessToken);
 
+                var lookup = new Dictionary<long, string>();
+
+                foreach (var line in File.ReadLines($"C:\\test\\esi\\typeids.csv"))
+                {
+                    var parts = line.Split(',');
+
+                    var itemTypeId = long.Parse(parts[0].Trim('"'));
+                    var name = parts[1].Trim('"');
+
+                    lookup[itemTypeId] = name;
+                }
+
+                foreach (var asset in character.Assets)
+                {
+                    if (lookup.TryGetValue(asset.TypeId, out var name))
+                    {
+                        asset.ItemName = name;
+                    }
+                }
+
                 var walletTransactions = await walletApplication.GetTransactions(id, accessToken);
                 ReconcileWallet(character, walletTransactions);
 

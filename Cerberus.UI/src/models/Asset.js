@@ -10,6 +10,7 @@ export default class Asset {
     constructor(data = {}) {
         // Accept either snake_case or camelCase keys to be robust
         this.itemId = data.itemId ?? data.item_id ?? data.itemID ?? null;
+        this.itemName = data.itemName ?? data.item_name ?? null;
         this.typeId = data.typeId ?? data.type_id ?? data.typeID ?? null;
         this.locationId = data.locationId ?? data.location_id ?? null;
         this.locationType = data.locationType ?? data.location_type ?? null;
@@ -17,6 +18,7 @@ export default class Asset {
 
         // Fields the view expects
         this.id = data.id ?? this.itemId;
+        this.name = data.name ?? this.itemName;
         this.type = data.type ?? this.typeId;
         this.location = data.location ?? (this.locationType || this.locationId ? `${this.locationType || ''} ${this.locationId || ''}`.trim() : null);
         this.quantity = data.quantity ?? 0;
@@ -32,6 +34,7 @@ export default class Asset {
     toPlain() {
         return {
             id: this.id,
+            name: this.name,
             type: this.type,
             location: this.location,
             quantity: this.quantity,
