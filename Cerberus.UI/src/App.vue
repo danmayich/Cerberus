@@ -10,6 +10,9 @@
         <router-link to="/assets" class="nav-link">Assets</router-link>
         <router-link to="/character" class="nav-link">Character</router-link>
       </nav>
+      <div class="sidebar-footer">
+        <button class="logout-button" @click="handleLogout">Logout</button>
+      </div>
     </div>
     <div class="main-content">
       <router-view></router-view>
@@ -18,8 +21,19 @@
 </template>
 
 <script>
+import authService from './services/auth.service'
+import { useCharacterStore } from './stores/character'
+
 export default {
-  name: 'App'
+  name: 'App',
+  methods: {
+    handleLogout() {
+      // Clear client-side state before logout
+      const characterStore = useCharacterStore()
+      characterStore.clearCharacter()
+      authService.logout()
+    }
+  }
 }
 </script>
 
@@ -68,6 +82,8 @@ export default {
   box-shadow: inset -10px 0 30px rgba(0, 0, 0, 0.5), -5px 0 20px rgba(0, 153, 255, 0.2);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar::before {
@@ -117,6 +133,35 @@ export default {
 nav {
   position: relative;
   z-index: 1;
+  flex: 1;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  position: relative;
+  z-index: 1;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.logout-button {
+  width: 100%;
+  padding: 12px 15px;
+  background: rgba(255, 68, 68, 0.15);
+  border: 1px solid rgba(255, 68, 68, 0.5);
+  color: #ff8080;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background: rgba(255, 68, 68, 0.25);
+  box-shadow: inset 0 0 15px rgba(255, 68, 68, 0.2), 0 0 12px rgba(255, 68, 68, 0.3);
+  color: #ffaaaa;
 }
 
 .nav-link {

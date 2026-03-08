@@ -27,14 +27,13 @@ namespace Cerberus.Api.Controllers.Authentication
         /// Log out.
         /// </summary>
         /// <returns></returns>
-        [Authorize]
         [HttpGet("logout")]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout([FromQuery] string returnUrl = "http://localhost:8080")
         {
-            // Sign out locally and at the OIDC provider
+            // Local sign-out (cookie auth).
+            // 'oidc' is not registered in this app; OAuth challenge scheme is 'EveSSO'.
             await HttpContext.SignOutAsync("Cookies");
-            await HttpContext.SignOutAsync("oidc");
-            return Redirect("/");
+            return Redirect(returnUrl);
         }
 
         /// <summary>
