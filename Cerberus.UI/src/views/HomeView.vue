@@ -1,7 +1,6 @@
 <template>
   <div class="home">
     <h1>Home</h1>
-    <p>Welcome to the home page!</p>
     
     <div class="login-container">
       <button 
@@ -52,14 +51,6 @@ export default {
 .home h1 {
   font-size: 3em;
   margin-bottom: 40px;
-  animation: glow 2s ease-in-out infinite;
-}
-
-.home p {
-  font-size: 1.1em;
-  color: var(--text-secondary);
-  margin-bottom: 40px;
-  letter-spacing: 1px;
 }
 
 .login-container {
