@@ -29,6 +29,10 @@ namespace Cerberus.Application
 
                 var lookup = new Dictionary<long, string>();
 
+                // TODO - Items in eve can be multiple stacks of 1 at a specific location, the api is returning all the mutliple stacks, update it to just combine them 
+                // into a single entry
+
+                // TODO - location look up
                 foreach (var line in File.ReadLines($"C:\\test\\esi\\typeids.csv"))
                 {
                     var parts = line.Split(',');
