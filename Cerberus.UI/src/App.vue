@@ -2,7 +2,8 @@
   <div class="app-container">
     <div class="sidebar">
       <div class="logo">
-        <img alt="Vue logo" src="./assets/logo.png" width="50">
+        <div class="logo-letter">C</div>
+        <div class="logo-text">CERBERUS</div>
       </div>
       <nav>
         <router-link to="/" class="nav-link">Home</router-link>
@@ -85,17 +86,32 @@ export default {
   margin-bottom: 30px;
   position: relative;
   z-index: 1;
-  padding: 15px;
+  padding: 20px 15px;
   border: 2px solid var(--accent-blue);
   border-radius: 8px;
   background: rgba(0, 153, 255, 0.05);
   box-shadow: 0 0 20px rgba(0, 153, 255, 0.2), inset 0 0 20px rgba(0, 212, 255, 0.1);
 }
 
-.logo img {
-  filter: brightness(0) saturate(100%) invert(1) sepia(1) hue-rotate(180deg) saturate(1.5);
-  max-width: 100%;
-  height: auto;
+.logo-letter {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: var(--primary-color);
+  text-shadow: 
+    0 0 10px rgba(0, 212, 255, 0.8),
+    0 0 20px rgba(0, 212, 255, 0.6),
+    0 0 30px rgba(0, 212, 255, 0.4),
+    0 0 40px rgba(0, 153, 255, 0.3);
+  margin-bottom: 5px;
+  letter-spacing: 2px;
+}
+
+.logo-text {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--secondary-color);
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 nav {
