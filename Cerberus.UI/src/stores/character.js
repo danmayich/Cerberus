@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import characterService from '../services/character.service'
+import { useAuthStore } from './auth'
 
 export const useCharacterStore = defineStore('character', {
   state: () => ({
@@ -32,6 +33,11 @@ export const useCharacterStore = defineStore('character', {
       try {
         this.character = await characterService.getCharacter()
         this.lastFetched = Date.now()
+        
+        // Mark user as authenticated after successful character fetch
+        const authStore = useAuthStore()
+        authStore.setAuthenticated(true)
+        
         return this.character
       } catch (error) {
         this.error = 'Failed to load character data: ' + error.message

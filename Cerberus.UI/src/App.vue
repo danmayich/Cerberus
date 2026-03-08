@@ -7,10 +7,10 @@
       </div>
       <nav>
         <router-link to="/" class="nav-link">Home</router-link>
-        <router-link to="/assets" class="nav-link">Assets</router-link>
-        <router-link to="/character" class="nav-link">Character</router-link>
+        <router-link v-if="authStore.isAuthenticated" to="/assets" class="nav-link">Assets</router-link>
+        <router-link v-if="authStore.isAuthenticated" to="/character" class="nav-link">Character</router-link>
       </nav>
-      <div class="sidebar-footer">
+      <div v-if="authStore.isAuthenticated" class="sidebar-footer">
         <button class="logout-button" @click="handleLogout">Logout</button>
       </div>
     </div>
@@ -23,14 +23,27 @@
 <script>
 import authService from './services/auth.service'
 import { useCharacterStore } from './stores/character'
+import { useAuthStore } from './stores/auth'
 
 export default {
   name: 'App',
+  setup() {
+    const authStore = useAuthStore()
+    const characterStore = useCharacterStore()
+    
+    // Check if we already have character data (e.g., from cache)
+    if (characterStore.hasCharacter) {
+      authStore.setAuthenticated(true)
+    }
+    
+    return { authStore }
+  },
   methods: {
     handleLogout() {
       // Clear client-side state before logout
       const characterStore = useCharacterStore()
       characterStore.clearCharacter()
+      this.authStore.logout()
       authService.logout()
     }
   }
