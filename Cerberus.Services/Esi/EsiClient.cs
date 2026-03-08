@@ -146,5 +146,20 @@ namespace Cerberus.Services.Esi
             var json = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<List<EsiWalletTransaction>>(json);
         }
+
+        public async Task<EsiCharacter> GetCharacterAsync(long characterId, string accessToken)
+        {
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+            var url = $"https://esi.evetech.net/latest/characters/{characterId}";
+            var response = await client.GetAsync(url);
+
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<EsiCharacter>(json)!;
+        }
     }
 }

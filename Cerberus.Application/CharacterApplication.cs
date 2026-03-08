@@ -1,18 +1,30 @@
 ﻿using Cerberus.Application.Assets;
 using Cerberus.Dto;
 using Cerberus.Services.Data;
+using Cerberus.Services.Esi;
 
 namespace Cerberus.Application
 {
-    public class CharacterApplication(CharacterRepository characterRepository, AssetRetrievalApplication assetRetrievalApplication, WalletApplication walletApplication)
+    public class CharacterApplication(CharacterRepository characterRepository, AssetRetrievalApplication assetRetrievalApplication, WalletApplication walletApplication, EsiClient esiClient)
     {
         public async Task<CharacterDto> LoadCharacter(long id, string accessToken)
         {
             var character = characterRepository.GetById(id);
 
             // Only update info once an hour
-            if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
-            {
+            //if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
+            //{
+                // fetch and attach character info
+                try
+                {
+                    var esiCharacter = await esiClient.GetCharacterAsync(id, accessToken);
+                    character.CharacterInfo = esiCharacter;
+                }
+                catch
+                {
+                    // ignore character-info failures and continue updating other data
+                }
+
                 character.Assets = await assetRetrievalApplication.GetAssets(id, accessToken);
 
                 var walletTransactions = await walletApplication.GetTransactions(id, accessToken);
@@ -28,7 +40,7 @@ namespace Cerberus.Application
                 UpdateTotalAssetQuantities(character);
 
                 await UpdateTotalTrackedAssetValue(character, accessToken);
-            }
+            //}
 
             characterRepository.Save(character);
 

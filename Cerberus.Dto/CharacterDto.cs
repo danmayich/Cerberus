@@ -31,6 +31,11 @@ namespace Cerberus.Dto
         public Dictionary<long, TransactionGroup> TransactionGroups { get; set; } = new Dictionary<long, TransactionGroup>();
 
         public Dictionary<long, WalletJournalEntry> WalletJournalEntries { get; set; } = new Dictionary<long, WalletJournalEntry>();
+
+        /// <summary>
+        /// ESI character info
+        /// </summary>
+        public EsiCharacter? CharacterInfo { get; set; }
     }
 
     public class TransactionGroup
