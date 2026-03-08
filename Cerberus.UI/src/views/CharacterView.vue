@@ -12,18 +12,28 @@
     
     <div v-else-if="character" class="character-data">
       <div class="character-header">
-        <h2>{{ character.characterInfo?.name || `Character ${character.id}` }}</h2>
-        <div v-if="character.characterInfo" class="character-details">
-          <p><strong>Character ID:</strong> {{ character.id }}</p>
-          <p v-if="character.characterInfo.corporationId"><strong>Corporation ID:</strong> {{ character.characterInfo.corporationId }}</p>
-          <p v-if="character.characterInfo.allianceId"><strong>Alliance ID:</strong> {{ character.characterInfo.allianceId }}</p>
-          <p v-if="character.characterInfo.securityStatus !== null && character.characterInfo.securityStatus !== undefined">
-            <strong>Security Status:</strong> {{ character.characterInfo.securityStatus.toFixed(2) }}
-          </p>
-          <p v-if="character.characterInfo.gender"><strong>Gender:</strong> {{ character.characterInfo.gender }}</p>
-          <p v-if="character.characterInfo.birthday"><strong>Birthday:</strong> {{ formatDate(character.characterInfo.birthday) }}</p>
+        <div class="character-header-content">
+          <img 
+            v-if="character.id" 
+            :src="`https://images.evetech.net/characters/${character.id}/portrait?tenant=tranquility&size=256`" 
+            :alt="`${character.characterInfo?.name || 'Character'} portrait`"
+            class="character-portrait"
+          />
+          <div class="character-info-section">
+            <h2>{{ character.characterInfo?.name || `Character ${character.id}` }}</h2>
+            <div v-if="character.characterInfo" class="character-details">
+              <p><strong>Character ID:</strong> {{ character.id }}</p>
+              <p v-if="character.characterInfo.corporationId"><strong>Corporation ID:</strong> {{ character.characterInfo.corporationId }}</p>
+              <p v-if="character.characterInfo.allianceId"><strong>Alliance ID:</strong> {{ character.characterInfo.allianceId }}</p>
+              <p v-if="character.characterInfo.securityStatus !== null && character.characterInfo.securityStatus !== undefined">
+                <strong>Security Status:</strong> {{ character.characterInfo.securityStatus.toFixed(2) }}
+              </p>
+              <p v-if="character.characterInfo.gender"><strong>Gender:</strong> {{ character.characterInfo.gender }}</p>
+              <p v-if="character.characterInfo.birthday"><strong>Birthday:</strong> {{ formatDate(character.characterInfo.birthday) }}</p>
+            </div>
+            <p class="last-updated">Last Updated: {{ formatDate(character.lastUpdated) }}</p>
+          </div>
         </div>
-        <p class="last-updated">Last Updated: {{ formatDate(character.lastUpdated) }}</p>
       </div>
 
       <!-- Assets Section -->
@@ -181,6 +191,26 @@ export default {
   border-radius: 8px;
   background: linear-gradient(135deg, rgba(0, 153, 255, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
   box-shadow: 0 0 20px rgba(0, 153, 255, 0.2);
+}
+
+.character-header-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.character-portrait {
+  width: 150px;
+  height: 150px;
+  border-radius: 8px;
+  border: 3px solid var(--primary-color);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+  flex-shrink: 0;
+  object-fit: cover;
+}
+
+.character-info-section {
+  flex: 1;
 }
 
 .character-header h2 {
