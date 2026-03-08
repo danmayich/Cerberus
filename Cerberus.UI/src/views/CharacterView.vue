@@ -43,23 +43,55 @@
           <span class="toggle-icon">{{ sectionStates.assets ? '▼' : '▶' }}</span>
         </div>
         <div v-show="sectionStates.assets" class="section-content">
-          <div class="table-container" v-if="character.assets.length > 0">
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Location</th>
-                  <th>Quantity</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="asset in character.assets" :key="asset.id">
-                  <td>{{ asset.name || asset.id }}</td>
-                  <td>{{ asset.location }}</td>
-                  <td>{{ asset.quantity }}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div v-if="character.assets.length > 0">
+            <div class="asset-filters">
+              <div class="filter-group">
+                <label for="nameFilter">Filter by Name:</label>
+                <input 
+                  id="nameFilter" 
+                  v-model="assetFilters.nameFilter" 
+                  type="text" 
+                  placeholder="Search name..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="filter-group">
+                <label for="locationFilter">Filter by Location:</label>
+                <input 
+                  id="locationFilter" 
+                  v-model="assetFilters.locationFilter" 
+                  type="text" 
+                  placeholder="Search location..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="filter-group">
+                <label for="sortOrder">Sort by Quantity:</label>
+                <select id="sortOrder" v-model="assetFilters.sortOrder" class="filter-select">
+                  <option value="none">None</option>
+                  <option value="asc">Low to High</option>
+                  <option value="desc">High to Low</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="asset in filteredAndSortedAssets" :key="asset.id">
+                    <td>{{ asset.name || asset.id }}</td>
+                    <td>{{ asset.location }}</td>
+                    <td>{{ asset.quantity }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <p v-else>No assets found</p>
         </div>
@@ -125,6 +157,11 @@ export default {
         assets: false,
         walletTransactions: false,
         transactionGroups: false
+      },
+      assetFilters: {
+        nameFilter: '',
+        locationFilter: '',
+        sortOrder: 'none'
       }
     }
   },
@@ -137,6 +174,36 @@ export default {
     },
     error() {
       return this.characterStore.error
+    },
+    filteredAndSortedAssets() {
+      if (!this.character || !this.character.assets) return []
+      
+      let assets = [...this.character.assets]
+      
+      // Filter by name
+      if (this.assetFilters.nameFilter) {
+        const nameSearch = this.assetFilters.nameFilter.toLowerCase()
+        assets = assets.filter(asset => 
+          (asset.name || asset.id || '').toString().toLowerCase().includes(nameSearch)
+        )
+      }
+      
+      // Filter by location
+      if (this.assetFilters.locationFilter) {
+        const locationSearch = this.assetFilters.locationFilter.toLowerCase()
+        assets = assets.filter(asset => 
+          (asset.location || '').toString().toLowerCase().includes(locationSearch)
+        )
+      }
+      
+      // Sort by quantity
+      if (this.assetFilters.sortOrder === 'asc') {
+        assets.sort((a, b) => (a.quantity || 0) - (b.quantity || 0))
+      } else if (this.assetFilters.sortOrder === 'desc') {
+        assets.sort((a, b) => (b.quantity || 0) - (a.quantity || 0))
+      }
+      
+      return assets
     }
   },
   methods: {
@@ -286,6 +353,58 @@ export default {
 
 .section-content {
   padding: 20px;
+}
+
+.asset-filters {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-group label {
+  font-size: 0.85em;
+  color: var(--primary-color);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.filter-input,
+.filter-select {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--accent-blue);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.95em;
+  transition: all 0.3s ease;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.filter-select option {
+  background: var(--darker-bg);
+  color: var(--text-secondary);
 }
 
 .table-container {
