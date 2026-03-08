@@ -39,14 +39,21 @@ public class Program
             });
         });
 
-        var settings = new CerberusSettings()
-        {
-            ESISettings = new ESISettings()
-            {
-                ClientId = "40f15c65c0004e2e87bc75bbeabb3301",
-                ClientSecret = "eat_1ZchAA3ww6Vpvh0r8BVzegv7WYYd65AaY_SQU5E"
-            }
-        };
+        var settings = builder.Configuration
+    .GetSection("CerberusSettings")
+    .Get<CerberusSettings>()
+    ?? throw new InvalidOperationException("CerberusSettings configuration is missing.");
+
+        builder.Services.AddSingleton(settings);
+
+        //var settings = new CerberusSettings()
+        //{
+        //    ESISettings = new ESISettings()
+        //    {
+        //        ClientId = "40f15c65c0004e2e87bc75bbeabb3301",
+        //        ClientSecret = "eat_1ZchAA3ww6Vpvh0r8BVzegv7WYYd65AaY_SQU5E"
+        //    }
+        //};
 
         builder.Services.AddHttpClient<EsiClient>();
         builder.Services.AddSingleton(settings);
