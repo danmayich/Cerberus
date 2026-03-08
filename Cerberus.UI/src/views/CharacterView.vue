@@ -12,7 +12,17 @@
     
     <div v-else-if="character" class="character-data">
       <div class="character-header">
-        <h2>Character ID: {{ character.id }}</h2>
+        <h2>{{ character.characterInfo?.name || `Character ${character.id}` }}</h2>
+        <div v-if="character.characterInfo" class="character-details">
+          <p><strong>Character ID:</strong> {{ character.id }}</p>
+          <p v-if="character.characterInfo.corporationId"><strong>Corporation ID:</strong> {{ character.characterInfo.corporationId }}</p>
+          <p v-if="character.characterInfo.allianceId"><strong>Alliance ID:</strong> {{ character.characterInfo.allianceId }}</p>
+          <p v-if="character.characterInfo.securityStatus !== null && character.characterInfo.securityStatus !== undefined">
+            <strong>Security Status:</strong> {{ character.characterInfo.securityStatus.toFixed(2) }}
+          </p>
+          <p v-if="character.characterInfo.gender"><strong>Gender:</strong> {{ character.characterInfo.gender }}</p>
+          <p v-if="character.characterInfo.birthday"><strong>Birthday:</strong> {{ formatDate(character.characterInfo.birthday) }}</p>
+        </div>
         <p class="last-updated">Last Updated: {{ formatDate(character.lastUpdated) }}</p>
       </div>
 
@@ -174,8 +184,27 @@ export default {
 }
 
 .character-header h2 {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   color: var(--secondary-color);
+}
+
+.character-details {
+  margin: 15px 0;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.character-details p {
+  margin: 8px 0;
+  color: var(--text-secondary);
+  font-size: 0.95em;
+}
+
+.character-details strong {
+  color: var(--primary-color);
+  margin-right: 8px;
 }
 
 .last-updated {
@@ -183,6 +212,7 @@ export default {
   font-style: italic;
   font-size: 0.95em;
   letter-spacing: 1px;
+  margin-top: 15px;
 }
 
 .section {

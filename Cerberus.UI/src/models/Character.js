@@ -10,6 +10,9 @@ export default class Character {
         this.id = data.id ?? data.character_id ?? null;
         this.lastUpdated = data.lastUpdated ?? data.last_updated ?? null;
 
+        // Character metadata from ESI
+        this.characterInfo = data.characterInfo ?? data.character_info ?? null;
+
         // walletTransactions and transactionGroups may be objects keyed by id
         this.walletTransactions = data.walletTransactions ?? data.wallet_transactions ?? {};
         this.transactionGroups = data.transactionGroups ?? data.transaction_groups ?? {};
@@ -27,6 +30,7 @@ export default class Character {
         return {
             id: this.id,
             lastUpdated: this.lastUpdated,
+            characterInfo: this.characterInfo,
             assets: this.assets.map(a => a.toPlain()),
             walletTransactions: this.walletTransactions,
             transactionGroups: this.transactionGroups,
