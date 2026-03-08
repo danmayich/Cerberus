@@ -11,8 +11,8 @@ namespace Cerberus.Application
             var character = characterRepository.GetById(id);
 
             // Only update info once an hour
-            //if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
-            //{
+            if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
+            {
                 character.Assets = await assetRetrievalApplication.GetAssets(id, accessToken);
 
                 var walletTransactions = await walletApplication.GetTransactions(id, accessToken);
@@ -28,7 +28,7 @@ namespace Cerberus.Application
                 UpdateTotalAssetQuantities(character);
 
                 await UpdateTotalTrackedAssetValue(character, accessToken);
-            //}
+            }
 
             characterRepository.Save(character);
 

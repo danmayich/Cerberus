@@ -43,39 +43,42 @@ export default {
 
 <style scoped>
 .home {
-  padding: 20px;
+  padding: 40px;
   text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.home h1 {
+  font-size: 3em;
+  margin-bottom: 40px;
+  animation: glow 2s ease-in-out infinite;
+}
+
+.home p {
+  font-size: 1.1em;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  letter-spacing: 1px;
 }
 
 .login-container {
-  margin-top: 2rem;
+  margin-top: 3rem;
+  padding: 30px;
+  border: 2px solid var(--accent-blue);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.2), inset 0 0 20px rgba(0, 212, 255, 0.05);
 }
 
 .login-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-}
-
-.login-button:hover {
-  background-color: #45a049;
-}
-
-.login-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
+  min-width: 200px;
+  font-size: 1.1em;
+  letter-spacing: 2px;
 }
 
 .error-message {
-  color: #ff0000;
-  margin-top: 1rem;
-  padding: 10px;
-  border-radius: 4px;
-  background-color: #ffe6e6;
+  margin-top: 1.5rem;
+  animation: scan 2s ease-in-out infinite;
 }
 </style>
