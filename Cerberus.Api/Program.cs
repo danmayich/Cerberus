@@ -22,7 +22,7 @@ public class Program
 
         // Allowed frontend origins (adjust ports to match where your Vue dev server runs)
         var allowedOrigins = new[] {
-    "http://localhost:8080",    // Vue dev server (adjust if different)
+    "http://localhost:8081",    // Vue dev server (adjust if different)
     "https://localhost:44328",  // IIS Express (if you run via IIS Express)
     "https://localhost:7283"    // Project https port (if you run via dotnet run)
 };
