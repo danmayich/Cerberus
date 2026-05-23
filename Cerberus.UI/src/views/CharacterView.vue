@@ -4,24 +4,6 @@
       <div>
         <h1>Character Information</h1>
       </div>
-      <div v-if="character" class="overview-stats">
-        <div class="stat-chip">
-          <span class="stat-label">Assets</span>
-          <span class="stat-value">{{ assetCount }}</span>
-        </div>
-        <div class="stat-chip">
-          <span class="stat-label">Wallet Tx</span>
-          <span class="stat-value">{{ walletTransactionCount }}</span>
-        </div>
-        <div class="stat-chip">
-          <span class="stat-label">Groups</span>
-          <span class="stat-value">{{ transactionGroupCount }}</span>
-        </div>
-        <div class="stat-chip">
-          <span class="stat-label">Tracked</span>
-          <span class="stat-value">{{ trackedPositionCount }}</span>
-        </div>
-      </div>
     </div>
     
     <div v-if="loading" class="loading">
@@ -586,10 +568,6 @@ export default {
 }
 
 .page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
   margin-bottom: 12px;
 }
 
@@ -603,36 +581,6 @@ h1 {
   margin: 4px 0 0;
   font-size: 0.84rem;
   color: var(--text-secondary);
-}
-
-.overview-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.stat-chip {
-  display: flex;
-  flex-direction: column;
-  min-width: 86px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: var(--panel-bg-soft);
-}
-
-.stat-label {
-  font-size: 0.7rem;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-.stat-value {
-  margin-top: 2px;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-primary);
 }
 
 .loading {
@@ -915,19 +863,6 @@ tr:hover {
 @media (max-width: 768px) {
   .character {
     padding: 10px;
-  }
-
-  .page-header {
-    flex-direction: column;
-  }
-
-  .overview-stats {
-    width: 100%;
-  }
-
-  .stat-chip {
-    flex: 1;
-    min-width: 0;
   }
 
   .section-header {
