@@ -28,36 +28,38 @@ namespace Cerberus.Api.Controllers.Authentication
 
         [Authorize]
         [HttpPost("track-position")]
-        public IActionResult TrackPosition([FromBody] EsiWalletTransaction transaction)
+        public async Task<IActionResult> TrackPosition([FromBody] EsiWalletTransaction transaction)
         {
             if (transaction is null)
             {
                 return BadRequest("Transaction payload is required.");
             }
 
-            var (charId, _, _) = GetTokens();
-            characterApplication.TrackPosition(charId, transaction);
+            var (charId, accessToken, _) = GetTokens();
+            var transactionGroups = await characterApplication.TrackPosition(charId, transaction, accessToken);
 
             return Ok(new
             {
                 tracked = true,
                 transactionId = transaction.TransactionId,
                 itemName = transaction.ItemName,
-                date = transaction.Date
+                date = transaction.Date,
+                transactionGroups
             });
         }
 
         [Authorize]
         [HttpDelete("track-position/{transactionId:long}")]
-        public IActionResult UntrackPosition([FromRoute] long transactionId)
+        public async Task<IActionResult> UntrackPosition([FromRoute] long transactionId)
         {
-            var (charId, _, _) = GetTokens();
-            characterApplication.UntrackPosition(charId, transactionId);
+            var (charId, accessToken, _) = GetTokens();
+            var transactionGroups = await characterApplication.UntrackPosition(charId, transactionId, accessToken);
 
             return Ok(new
             {
                 tracked = false,
-                transactionId
+                transactionId,
+                transactionGroups
             });
         }
 

@@ -7,7 +7,7 @@ namespace Cerberus.Application
 {
     public class CharacterApplication(CharacterRepository characterRepository, AssetRetrievalApplication assetRetrievalApplication, WalletApplication walletApplication, EsiClient esiClient)
     {
-        public void TrackPosition(long characterId, EsiWalletTransaction transaction)
+        public async Task<Dictionary<long, TransactionGroup>> TrackPosition(long characterId, EsiWalletTransaction transaction, string accessToken)
         {
             if (transaction is null)
             {
@@ -17,19 +17,31 @@ namespace Cerberus.Application
             var character = characterRepository.GetById(characterId);
             character.TrackedPositions ??= new Dictionary<long, EsiWalletTransaction>();
             character.TrackedPositions[transaction.TransactionId] = transaction;
+
+            GroupTrackedTransactionsByType(character);
+            AddItemNamesToTransactionGroups(character);
+            await UpdateTrackedGroupMarketValues(character, accessToken);
+
             characterRepository.Save(character);
+            return character.TransactionGroups;
         }
 
-        public void UntrackPosition(long characterId, long transactionId)
+        public async Task<Dictionary<long, TransactionGroup>> UntrackPosition(long characterId, long transactionId, string accessToken)
         {
             var character = characterRepository.GetById(characterId);
             if (character.TrackedPositions is null)
             {
-                return;
+                return character.TransactionGroups ?? new Dictionary<long, TransactionGroup>();
             }
 
             character.TrackedPositions.Remove(transactionId);
+
+            GroupTrackedTransactionsByType(character);
+            AddItemNamesToTransactionGroups(character);
+            await UpdateTrackedGroupMarketValues(character, accessToken);
+
             characterRepository.Save(character);
+            return character.TransactionGroups;
         }
 
         public async Task<CharacterDto> LoadCharacter(long id, string accessToken)
@@ -37,8 +49,8 @@ namespace Cerberus.Application
             var character = characterRepository.GetById(id);
 
             // Only update info once an hour
-            if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
-            {
+            //if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
+            //{
                 // fetch and attach character info
                 try
                 {
@@ -82,15 +94,36 @@ namespace Cerberus.Application
                 var walletJournalEntries = await walletApplication.GetWalleyJournalEntries(id, accessToken);
                 ReconcileWalletJourneyTransactions(character, walletJournalEntries.ToList());
 
-            }
+            //}
 
             GroupTrackedTransactionsByType(character);
 
             AddItemNamesToTransactionGroups(character);
 
+            await UpdateTrackedGroupMarketValues(character, accessToken);
+
             characterRepository.Save(character);
 
             return character;
+        }
+
+        private async Task UpdateTrackedGroupMarketValues(CharacterDto character, string accessToken)
+        {
+            foreach (var transactionGroup in character.TransactionGroups)
+            {
+                var group = transactionGroup.Value;
+                var latestBuyOrder = await assetRetrievalApplication.GetMarketOrderDtosAsync(accessToken, transactionGroup.Key.ToString());
+
+                if (latestBuyOrder is null)
+                {
+                    group.TotalAssetValue = 0;
+                    group.TotalProfit = -group.TotalTrackedAssetPrice;
+                    continue;
+                }
+
+                group.TotalAssetValue = latestBuyOrder.Price * group.TotalTrackedQuantity;
+                group.TotalProfit = group.TotalAssetValue - group.TotalTrackedAssetPrice;
+            }
         }
 
         private void AddItemNamesToTransactionGroups(CharacterDto character)

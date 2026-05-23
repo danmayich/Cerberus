@@ -74,8 +74,13 @@ namespace Cerberus.Dto
         public decimal TotalTrackedAssetPrice { get; set; }
 
         /// <summary>
-        /// Legacy asset valuation field retained for compatibility.
+        /// Current market value of tracked units based on latest buy order.
         /// </summary>
         public decimal TotalAssetValue { get; set; }
+
+        /// <summary>
+        /// Unrealized profit/loss for tracked units at current market value.
+        /// </summary>
+        public decimal TotalProfit { get; set; }
     }
 }

@@ -278,6 +278,8 @@
                     <th>Total Amount</th>
                     <th>Average Cost</th>
                     <th>Total Cost</th>
+                    <th>Current Market Value</th>
+                    <th>Profit</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -286,6 +288,8 @@
                     <td>{{ formatNumber(group.totalTrackedQuantity) }}</td>
                     <td>{{ formatCurrency(group.averageTrackedPrice) }}</td>
                     <td>{{ formatCurrency(group.totalTrackedAssetPrice) }}</td>
+                    <td>{{ formatCurrency(group.totalAssetValue) }}</td>
+                    <td :class="profitCellClass(group.totalProfit)">{{ formatCurrency(group.totalProfit) }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -481,6 +485,9 @@ export default {
         maximumFractionDigits: 2
       }).format(value) + ' ISK'
     },
+    profitCellClass(value) {
+      return value >= 0 ? 'profit-positive' : 'profit-negative'
+    },
     isPositionTracked(rowKey) {
       if (this.trackedPositions[rowKey] !== undefined) {
         return !!this.trackedPositions[rowKey]
@@ -499,12 +506,17 @@ export default {
 
       this.trackingInFlight[rowKey] = true
       try {
+        let result
         if (isTracked) {
           const payload = { ...transaction }
           delete payload._rowKey
-          await characterService.trackPosition(payload)
+          result = await characterService.trackPosition(payload)
         } else {
-          await characterService.untrackPosition(transaction.transactionId)
+          result = await characterService.untrackPosition(transaction.transactionId)
+        }
+
+        if (result?.transactionGroups && this.characterStore.character) {
+          this.characterStore.character.transactionGroups = result.transactionGroups
         }
       } catch (error) {
         console.error('Failed to update tracked position:', error)
@@ -920,6 +932,16 @@ tr:hover {
 .track-switch input:checked + .track-slider:before {
   transform: translateX(18px);
   background-color: var(--secondary-color);
+}
+
+.profit-positive {
+  color: #44d17a;
+  font-weight: 700;
+}
+
+.profit-negative {
+  color: #ff6b6b;
+  font-weight: 700;
 }
 
 @media (max-width: 768px) {
