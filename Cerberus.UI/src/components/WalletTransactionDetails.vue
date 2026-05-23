@@ -15,10 +15,6 @@
     </div>
     <div class="details-grid">
       <div class="detail-item">
-        <label>Transaction ID:</label>
-        <span>{{ transaction.transactionId }}</span>
-      </div>
-      <div class="detail-item">
         <label>Quantity:</label>
         <span>{{ formatNumber(transaction.quantity) }}</span>
       </div>
@@ -29,22 +25,6 @@
       <div class="detail-item">
         <label>Total Value:</label>
         <span>{{ formatCurrency(transaction.unitPrice * transaction.quantity) }}</span>
-      </div>
-      <div class="detail-item">
-        <label>Type ID:</label>
-        <span>{{ transaction.typeId }}</span>
-      </div>
-      <div class="detail-item">
-        <label>Location ID:</label>
-        <span>{{ transaction.locationId }}</span>
-      </div>
-      <div class="detail-item">
-        <label>Journal Ref:</label>
-        <span>{{ transaction.journalRefId }}</span>
-      </div>
-      <div class="detail-item">
-        <label>Type:</label>
-        <span>{{ transaction.isPersonal ? 'Personal' : 'Corporate' }}</span>
       </div>
     </div>
   </div>

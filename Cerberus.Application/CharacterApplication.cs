@@ -75,6 +75,7 @@ namespace Cerberus.Application
         {
             foreach (var transactionGroup in character.TransactionGroups)
             {
+                // Only fetches the top buy order
                 var order = await assetRetrievalApplication.GetMarketOrderDtosAsync(accessToken, transactionGroup.Key.ToString());
 
                 if (order != null)

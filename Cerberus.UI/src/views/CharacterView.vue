@@ -1,6 +1,25 @@
 <template>
   <div class="character">
-    <h1>Character Information</h1>
+    <div class="page-header">
+      <div>
+        <h1>Character Information</h1>
+        <p class="page-subtitle">Operational snapshot with compact section drill-downs.</p>
+      </div>
+      <div v-if="character" class="overview-stats">
+        <div class="stat-chip">
+          <span class="stat-label">Assets</span>
+          <span class="stat-value">{{ assetCount }}</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-label">Wallet Tx</span>
+          <span class="stat-value">{{ walletTransactionCount }}</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-label">Groups</span>
+          <span class="stat-value">{{ transactionGroupCount }}</span>
+        </div>
+      </div>
+    </div>
     
     <div v-if="loading" class="loading">
       Loading character data...
@@ -39,7 +58,10 @@
       <!-- Assets Section -->
       <div class="section">
         <div class="section-header" @click="toggleSection('assets')">
-          <h3>Assets ({{ character.assets.length }})</h3>
+          <h3>
+            <span>Assets</span>
+            <span class="section-count">{{ assetCount }}</span>
+          </h3>
           <span class="toggle-icon">{{ sectionStates.assets ? '▼' : '▶' }}</span>
         </div>
         <div v-show="sectionStates.assets" class="section-content">
@@ -100,7 +122,10 @@
       <!-- Wallet Transactions Section -->
       <div class="section">
         <div class="section-header" @click="toggleSection('walletTransactions')">
-          <h3>Wallet Transactions ({{ Object.keys(character.walletTransactions).length }})</h3>
+          <h3>
+            <span>Wallet Transactions</span>
+            <span class="section-count">{{ walletTransactionCount }}</span>
+          </h3>
           <span class="toggle-icon">{{ sectionStates.walletTransactions ? '▼' : '▶' }}</span>
         </div>
         <div v-show="sectionStates.walletTransactions" class="section-content">
@@ -118,7 +143,10 @@
       <!-- Transaction Groups Section -->
       <div class="section">
         <div class="section-header" @click="toggleSection('transactionGroups')">
-          <h3>Transaction Groups ({{ Object.keys(character.transactionGroups).length }})</h3>
+          <h3>
+            <span>Transaction Groups</span>
+            <span class="section-count">{{ transactionGroupCount }}</span>
+          </h3>
           <span class="toggle-icon">{{ sectionStates.transactionGroups ? '▼' : '▶' }}</span>
         </div>
         <div v-show="sectionStates.transactionGroups" class="section-content">
@@ -175,6 +203,15 @@ export default {
     error() {
       return this.characterStore.error
     },
+    assetCount() {
+      return this.character?.assets?.length || 0
+    },
+    walletTransactionCount() {
+      return Object.keys(this.character?.walletTransactions || {}).length
+    },
+    transactionGroupCount() {
+      return Object.keys(this.character?.transactionGroups || {}).length
+    },
     filteredAndSortedAssets() {
       if (!this.character || !this.character.assets) return []
       
@@ -225,7 +262,61 @@ export default {
 
 <style scoped>
 .character {
-  padding: 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 12px 14px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.55rem;
+  line-height: 1.1;
+}
+
+.page-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  opacity: 0.9;
+  letter-spacing: 0.3px;
+}
+
+.overview-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  min-width: 86px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.12) 0%, rgba(0, 212, 255, 0.06) 100%);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  margin-top: 2px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--secondary-color);
 }
 
 .loading {
@@ -252,26 +343,26 @@ export default {
 }
 
 .character-header {
-  margin-bottom: 2rem;
-  padding: 20px;
-  border: 2px solid var(--accent-blue);
+  margin-bottom: 1rem;
+  padding: 14px;
+  border: 1px solid var(--accent-blue);
   border-radius: 8px;
   background: linear-gradient(135deg, rgba(0, 153, 255, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
-  box-shadow: 0 0 20px rgba(0, 153, 255, 0.2);
+  box-shadow: 0 0 12px rgba(0, 153, 255, 0.16);
 }
 
 .character-header-content {
   display: flex;
-  gap: 20px;
+  gap: 14px;
   align-items: flex-start;
 }
 
 .character-portrait {
-  width: 150px;
-  height: 150px;
-  border-radius: 8px;
-  border: 3px solid var(--primary-color);
-  box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 0 14px rgba(0, 212, 255, 0.35);
   flex-shrink: 0;
   object-fit: cover;
 }
@@ -281,22 +372,24 @@ export default {
 }
 
 .character-header h2 {
-  margin-bottom: 15px;
+  margin: 0;
   color: var(--secondary-color);
+  font-size: 1.35rem;
+  line-height: 1.2;
 }
 
 .character-details {
-  margin: 15px 0;
-  padding: 15px;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  border-left: 3px solid var(--primary-color);
+  margin: 10px 0;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.24);
+  border-radius: 8px;
+  border-left: 2px solid var(--primary-color);
 }
 
 .character-details p {
-  margin: 8px 0;
+  margin: 5px 0;
   color: var(--text-secondary);
-  font-size: 0.95em;
+  font-size: 0.9em;
 }
 
 .character-details strong {
@@ -307,28 +400,28 @@ export default {
 .last-updated {
   color: var(--text-secondary);
   font-style: italic;
-  font-size: 0.95em;
-  letter-spacing: 1px;
-  margin-top: 15px;
+  font-size: 0.85em;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
 }
 
 .section {
-  margin: 2rem 0;
-  border: 2px solid var(--accent-blue);
+  margin: 0.75rem 0;
+  border: 1px solid var(--accent-blue);
   border-radius: 8px;
   overflow: hidden;
   background: linear-gradient(135deg, rgba(0, 153, 255, 0.05) 0%, transparent 100%);
-  box-shadow: 0 0 15px rgba(0, 153, 255, 0.1);
+  box-shadow: 0 0 10px rgba(0, 153, 255, 0.08);
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  padding: 10px 12px;
   cursor: pointer;
   background: linear-gradient(90deg, rgba(0, 153, 255, 0.15) 0%, rgba(0, 212, 255, 0.05) 100%);
-  border-bottom: 1px solid var(--accent-blue);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -338,59 +431,79 @@ export default {
 }
 
 .section-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   color: var(--secondary-color);
-  font-size: 1.1em;
+  font-size: 0.98em;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+}
+
+.section-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(0, 212, 255, 0.16);
+  border: 1px solid rgba(0, 212, 255, 0.45);
+  color: var(--primary-color);
+  font-size: 0.8rem;
+  letter-spacing: 0;
+  font-weight: 700;
 }
 
 .toggle-icon {
-  font-size: 1.2rem;
+  font-size: 1rem;
   transition: transform 0.2s;
   color: var(--primary-color);
 }
 
 .section-content {
-  padding: 20px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .asset-filters {
   display: flex;
-  gap: 15px;
-  margin-bottom: 20px;
-  padding: 15px;
-  background: rgba(0, 0, 0, 0.2);
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.25);
   border-radius: 6px;
-  border: 1px solid rgba(0, 212, 255, 0.2);
+  border: 1px solid rgba(0, 212, 255, 0.28);
   flex-wrap: wrap;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
   flex: 1;
-  min-width: 200px;
+  min-width: 160px;
 }
 
 .filter-group label {
-  font-size: 0.85em;
+  font-size: 0.78em;
   color: var(--primary-color);
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.7px;
 }
 
 .filter-input,
 .filter-select {
-  padding: 8px 12px;
+  padding: 6px 8px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--accent-blue);
   border-radius: 4px;
   color: var(--text-secondary);
   font-family: inherit;
-  font-size: 0.95em;
+  font-size: 0.88em;
   transition: all 0.3s ease;
 }
 
@@ -409,12 +522,16 @@ export default {
 
 .table-container {
   overflow-x: auto;
+  border: 1px solid rgba(0, 212, 255, 0.22);
+  border-radius: 8px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1rem;
+  margin-top: 0;
+  font-size: 0.92em;
+  table-layout: fixed;
 }
 
 thead {
@@ -423,17 +540,20 @@ thead {
 }
 
 th {
-  padding: 12px;
+  padding: 8px 10px;
   text-align: left;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
 }
 
 td {
-  padding: 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid rgba(0, 212, 255, 0.2);
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 tr:hover {
@@ -442,13 +562,54 @@ tr:hover {
 
 .transaction-groups-container {
   display: grid;
-  gap: 1.5rem;
+  gap: 0.9rem;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
 .wallet-transactions-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .character {
+    padding: 10px;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .overview-stats {
+    width: 100%;
+  }
+
+  .stat-chip {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .character-header-content {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .character-portrait {
+    width: 92px;
+    height: 92px;
+  }
+
+  .section-header {
+    padding: 9px 10px;
+  }
+
+  .section-content {
+    padding: 10px;
+  }
+
+  .filter-group {
+    min-width: 130px;
+  }
 }
 </style>
