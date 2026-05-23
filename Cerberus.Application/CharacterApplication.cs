@@ -82,38 +82,15 @@ namespace Cerberus.Application
                 var walletJournalEntries = await walletApplication.GetWalleyJournalEntries(id, accessToken);
                 ReconcileWalletJourneyTransactions(character, walletJournalEntries.ToList());
 
-                GroupTransactionsByItem(character);
-
-                AddItemNamesToTransactionGroups(character);
-
-                UpdateTotalAssetQuantities(character);
-
-                await UpdateTotalTrackedAssetValue(character, accessToken);
             }
+
+            GroupTrackedTransactionsByType(character);
+
+            AddItemNamesToTransactionGroups(character);
 
             characterRepository.Save(character);
 
             return character;
-        }
-
-        private async Task UpdateTotalTrackedAssetValue(CharacterDto character, string accessToken)
-        {
-            foreach (var transactionGroup in character.TransactionGroups)
-            {
-                // Only fetches the top buy order
-                var order = await assetRetrievalApplication.GetMarketOrderDtosAsync(accessToken, transactionGroup.Key.ToString());
-
-                if (order != null)
-                {
-                    long multiplierToUse = transactionGroup.Value.TotalTrackedQuantity;
-                    if (transactionGroup.Value.TotalQuantity < transactionGroup.Value.TotalTrackedQuantity)
-                    {
-                        multiplierToUse = transactionGroup.Value.TotalQuantity;
-                    }
-
-                    transactionGroup.Value.TotalAssetValue = (order.Price * multiplierToUse);
-                }
-            }
         }
 
         private void AddItemNamesToTransactionGroups(CharacterDto character)
@@ -123,12 +100,26 @@ namespace Cerberus.Application
             {
                 foreach (var transactionGroup in character.TransactionGroups)
                 {
-                    transactionGroup.Value.ItemName = assetNamesDict[transactionGroup.Key];
+                    if (assetNamesDict.TryGetValue(transactionGroup.Key, out var itemName))
+                    {
+                        transactionGroup.Value.ItemName = itemName;
+                    }
                 }
 
                 foreach (var walletTransaction in character.WalletTransactions)
                 {
-                    walletTransaction.Value.ItemName = assetNamesDict[walletTransaction.Value.TypeId];
+                    if (assetNamesDict.TryGetValue(walletTransaction.Value.TypeId, out var itemName))
+                    {
+                        walletTransaction.Value.ItemName = itemName;
+                    }
+                }
+
+                foreach (var trackedTransaction in character.TrackedPositions)
+                {
+                    if (assetNamesDict.TryGetValue(trackedTransaction.Value.TypeId, out var itemName))
+                    {
+                        trackedTransaction.Value.ItemName = itemName;
+                    }
                 }
             }
             catch (Exception ex)
@@ -196,69 +187,45 @@ namespace Cerberus.Application
 
 
         /// <summary>
-        /// Group all of our transactions by item time and calculate the tracked value.
+        /// Group tracked buy transactions by type id and calculate their aggregate cost basis.
         /// </summary>
         /// <param name="character"></param>
-        private void GroupTransactionsByItem(CharacterDto character)
+        private void GroupTrackedTransactionsByType(CharacterDto character)
         {
             character.TransactionGroups = new Dictionary<long, TransactionGroup>();
 
-            foreach (var transaction in character.WalletTransactions)
+            foreach (var transaction in character.TrackedPositions)
             {
                 var typeId = transaction.Value.TypeId;
 
-                // We only want to track our buy
-                // This _should_ cover buying from sell orders and putting in buy orders
-                if (transaction.Value.IsBuy)
+                // We only want to aggregate buy-side tracked transactions for cost basis.
+                if (!transaction.Value.IsBuy || transaction.Value.Quantity <= 0)
                 {
-                    if (character.TransactionGroups.ContainsKey(typeId))
+                    continue;
+                }
+
+                var totalCost = transaction.Value.UnitPrice * transaction.Value.Quantity;
+
+                if (character.TransactionGroups.TryGetValue(typeId, out var existingGroup))
+                {
+                    existingGroup.TotalTrackedQuantity += transaction.Value.Quantity;
+                    existingGroup.TotalTrackedAssetPrice += totalCost;
+
+                    if (existingGroup.TotalTrackedQuantity > 0)
                     {
-                        character.TransactionGroups[typeId].TotalTrackedQuantity += transaction.Value.Quantity;
-                        character.TransactionGroups[typeId].TotalTrackedAssetPrice += (transaction.Value.UnitPrice * transaction.Value.Quantity);
-                        character.TransactionGroups[typeId].AverageTrackedPrice = (character.TransactionGroups[typeId].TotalTrackedAssetPrice / character.TransactionGroups[typeId].TotalTrackedQuantity);
+                        existingGroup.AverageTrackedPrice = existingGroup.TotalTrackedAssetPrice / existingGroup.TotalTrackedQuantity;
                     }
-                    else
-                    {
-                        character.TransactionGroups.Add(typeId, new TransactionGroup()
-                        {
-                            TotalTrackedQuantity = transaction.Value.Quantity,
-                            TotalTrackedAssetPrice = transaction.Value.UnitPrice * transaction.Value.Quantity,
-                            AverageTrackedPrice = (transaction.Value.UnitPrice * transaction.Value.Quantity) / transaction.Value.Quantity
-                        });
-                    }
+
+                    continue;
                 }
-                else
+
+                character.TransactionGroups.Add(typeId, new TransactionGroup()
                 {
-                    // Is sell
-                    if (character.TransactionGroups.ContainsKey(typeId))
-                    {
-
-                    }
-                }
+                    TotalTrackedQuantity = transaction.Value.Quantity,
+                    TotalTrackedAssetPrice = totalCost,
+                    AverageTrackedPrice = totalCost / transaction.Value.Quantity
+                });
             }
-        }
-
-        private void UpdateTotalAssetQuantities(CharacterDto character)
-        {
-            foreach (var asset in character.Assets)
-            {
-                if (character.TransactionGroups.ContainsKey(asset.TypeId))
-                {
-                    character.TransactionGroups[asset.TypeId].TotalQuantity += asset.Quantity;
-                }
-            }
-
-
-            var itemsGreaterThan0 = new Dictionary<long, TransactionGroup>();
-            foreach (var transactionGroup in character.TransactionGroups)
-            {
-                if (transactionGroup.Value.TotalQuantity > 0)
-                {
-                    itemsGreaterThan0.Add(transactionGroup.Key, transactionGroup.Value);
-                }
-            }
-
-            character.TransactionGroups = itemsGreaterThan0;
         }
     }
 }

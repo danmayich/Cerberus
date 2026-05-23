@@ -33,6 +33,9 @@ namespace Cerberus.Dto
         /// </summary>
         public Dictionary<long, EsiWalletTransaction> TrackedPositions { get; set; } = new Dictionary<long, EsiWalletTransaction>();
 
+        /// <summary>
+        /// Aggregated tracked buy transactions grouped by type id.
+        /// </summary>
         public Dictionary<long, TransactionGroup> TransactionGroups { get; set; } = new Dictionary<long, TransactionGroup>();
 
         public Dictionary<long, WalletJournalEntry> WalletJournalEntries { get; set; } = new Dictionary<long, WalletJournalEntry>();
@@ -46,32 +49,32 @@ namespace Cerberus.Dto
     public class TransactionGroup
     {
         /// <summary>
-        /// Name of the asset.
+        /// Name of the item.
         /// </summary>
         public string ItemName { get; set; } = string.Empty;
 
         /// <summary>
-        /// Total number of these items you have, even before tracking began.
+        /// Legacy asset quantity field retained for compatibility.
         /// </summary>
         public long TotalQuantity { get; set; }
 
         /// <summary>
-        /// Total number of these items you have, since tracking began.
+        /// Total number of tracked units in this group.
         /// </summary>
         public long TotalTrackedQuantity { get; set; }
 
         /// <summary>
-        /// Average tracked price of the asset.
+        /// Average cost per unit across tracked buy transactions.
         /// </summary>
         public decimal AverageTrackedPrice { get; set; }
 
         /// <summary>
-        /// Running cost of the tracked portion of the asset.
+        /// Running total cost of the tracked buy transactions.
         /// </summary>
         public decimal TotalTrackedAssetPrice { get; set; }
 
         /// <summary>
-        /// Total current value of the asset including tracked and not tracked.
+        /// Legacy asset valuation field retained for compatibility.
         /// </summary>
         public decimal TotalAssetValue { get; set; }
     }

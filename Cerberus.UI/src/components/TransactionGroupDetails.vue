@@ -5,24 +5,16 @@
     </div>
     <div class="details-grid">
       <div class="detail-item">
-        <label>Total Quantity:</label>
-        <span>{{ formatNumber(group.totalQuantity) }}</span>
-      </div>
-      <div class="detail-item">
-        <label>Tracked Quantity:</label>
+        <label>Total Amount:</label>
         <span>{{ formatNumber(group.totalTrackedQuantity) }}</span>
       </div>
       <div class="detail-item">
-        <label>Average Price:</label>
+        <label>Average Cost:</label>
         <span>{{ formatCurrency(group.averageTrackedPrice) }}</span>
       </div>
       <div class="detail-item">
-        <label>Tracked Asset Price:</label>
+        <label>Total Cost:</label>
         <span>{{ formatCurrency(group.totalTrackedAssetPrice) }}</span>
-      </div>
-      <div class="detail-item">
-        <label>Total Asset Value:</label>
-        <span>{{ formatCurrency(group.totalAssetValue) }}</span>
       </div>
     </div>
   </div>

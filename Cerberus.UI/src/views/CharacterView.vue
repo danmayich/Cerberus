@@ -263,7 +263,7 @@
       <div class="section">
         <div class="section-header" @click="toggleSection('transactionGroups')">
           <h3>
-            <span>Transaction Groups</span>
+            <span>Tracked Transaction Groups</span>
             <span class="section-count">{{ transactionGroupCount }}</span>
           </h3>
           <span class="toggle-icon">{{ sectionStates.transactionGroups ? '▼' : '▶' }}</span>
