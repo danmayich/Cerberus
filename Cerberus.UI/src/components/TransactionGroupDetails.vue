@@ -75,8 +75,8 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 10px;
-  background: #ffffff;
-  border-left: 3px solid #d1d5db;
+  background: var(--surface-raised);
+  border-left: 3px solid var(--border-color);
   border-radius: 4px;
 }
 

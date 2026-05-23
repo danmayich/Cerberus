@@ -72,7 +72,7 @@ export default {
   justify-content: space-between;
   align-items: flex-start;
   border-bottom: 1px solid var(--border-color);
-  background: #ffffff;
+  background: var(--surface-raised);
 }
 
 .transaction-main {
@@ -98,15 +98,15 @@ export default {
 }
 
 .transaction-buy .transaction-type {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
 }
 
 .transaction-sell .transaction-type {
-  background: #fef2f2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  border: 1px solid var(--danger-border);
 }
 
 .transaction-date {
@@ -125,8 +125,8 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 10px;
-  background: #ffffff;
-  border-left: 3px solid #d1d5db;
+  background: var(--surface-raised);
+  border-left: 3px solid var(--border-color);
   border-radius: 4px;
 }
 
@@ -143,10 +143,10 @@ export default {
 }
 
 .transaction-buy {
-  border-left: 4px solid #16a34a;
+  border-left: 4px solid #22c55e;
 }
 
 .transaction-sell {
-  border-left: 4px solid #dc2626;
+  border-left: 4px solid #ef4444;
 }
 </style>

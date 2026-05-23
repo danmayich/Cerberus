@@ -153,9 +153,9 @@ export default {
 }
 
 .router-link-active {
-  background: #eef2ff;
-  color: #1e3a8a;
-  border-color: #c7d2fe;
+  background: var(--info-bg);
+  color: var(--info-text);
+  border-color: var(--info-border);
 }
 
 .sidebar-character {

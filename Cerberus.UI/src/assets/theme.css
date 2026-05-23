@@ -1,27 +1,42 @@
 /* Minimal base theme */
 :root {
-  --primary-color: #1f2937;
-  --secondary-color: #111827;
-  --tertiary-color: #374151;
-  --alert-color: #b91c1c;
-  --ok-color: #166534;
+  --primary-color: #f3f4f6;
+  --secondary-color: #e5e7eb;
+  --tertiary-color: #9ca3af;
+  --alert-color: #fca5a5;
+  --ok-color: #86efac;
 
-  --dark-bg: #f3f4f6;
-  --darker-bg: #f8fafc;
-  --panel-bg: #ffffff;
-  --panel-bg-soft: #f9fafb;
+  --dark-bg: #11151b;
+  --darker-bg: #0b0f14;
+  --panel-bg: #171c24;
+  --panel-bg-soft: #1d2430;
 
-  --accent-blue: #2563eb;
-  --accent-cyan: #0f766e;
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --border-color: #d1d5db;
+  --accent-blue: #60a5fa;
+  --accent-cyan: #2dd4bf;
+  --text-primary: #e5e7eb;
+  --text-secondary: #9aa4b2;
+  --border-color: #2b3645;
+
+  --surface-hover: #222a36;
+  --surface-raised: #202734;
+  --input-bg: #121821;
+  --table-head-bg: #202734;
+  --table-head-text: #e5e7eb;
+  --info-bg: #182338;
+  --info-border: #334a72;
+  --info-text: #bfdbfe;
+  --success-bg: #102117;
+  --success-border: #264a34;
+  --success-text: #86efac;
+  --danger-bg: #28161a;
+  --danger-border: #6d3038;
+  --danger-text: #fca5a5;
 
   /* Retained for compatibility with existing components */
-  --lcars-bar-a: #9ca3af;
-  --lcars-bar-b: #6b7280;
-  --lcars-bar-c: #475569;
-  --lcars-bar-d: #64748b;
+  --lcars-bar-a: #64748b;
+  --lcars-bar-b: #475569;
+  --lcars-bar-c: #334155;
+  --lcars-bar-d: #1e293b;
 }
 
 * {
@@ -35,13 +50,14 @@ body {
   background-color: var(--darker-bg);
   color: var(--text-primary);
   line-height: 1.5;
+  background-image: radial-gradient(circle at top, rgba(96, 165, 250, 0.08), transparent 35%);
 }
 
 button {
   font: inherit;
-  background: var(--text-primary);
-  color: #ffffff;
-  border: 1px solid var(--text-primary);
+  background: var(--accent-blue);
+  color: #08111f;
+  border: 1px solid #4c8fe5;
   padding: 0.55rem 0.9rem;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -49,8 +65,8 @@ button {
 }
 
 button:hover {
-  background: #1f2937;
-  border-color: #1f2937;
+  background: #7ab4fb;
+  border-color: #7ab4fb;
 }
 
 button:disabled {
@@ -59,7 +75,7 @@ button:disabled {
 }
 
 a {
-  color: #1d4ed8;
+  color: var(--accent-blue);
   text-decoration: none;
 }
 
@@ -90,7 +106,7 @@ input,
 textarea,
 select {
   font: inherit;
-  background: #ffffff;
+  background: var(--input-bg);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   padding: 0.5rem 0.65rem;
@@ -101,8 +117,8 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.45);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
 
 ul,
@@ -124,34 +140,34 @@ li {
 
 .error,
 .error-message {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
   border-radius: 0.5rem;
   padding: 0.8rem;
   margin: 0.75rem 0;
-  color: #991b1b;
+  color: var(--danger-text);
 }
 
 .success {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
   border-radius: 0.5rem;
   padding: 0.8rem;
   margin: 0.75rem 0;
-  color: #166534;
+  color: var(--success-text);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   margin: 0.75rem 0;
-  background: #ffffff;
+  background: var(--panel-bg);
   border: 1px solid var(--border-color);
 }
 
 thead {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--table-head-bg);
+  color: var(--table-head-text);
 }
 
 th,
@@ -162,7 +178,7 @@ td {
 }
 
 tbody tr:hover {
-  background: #f9fafb;
+  background: var(--surface-hover);
 }
 
 ::-webkit-scrollbar {
@@ -171,16 +187,16 @@ tbody tr:hover {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f3f4f6;
+  background: #121821;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #9ca3af;
+  background: #3d4b5f;
   border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: #52647f;
 }
 
 @keyframes glow {

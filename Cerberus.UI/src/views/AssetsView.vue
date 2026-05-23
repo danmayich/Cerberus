@@ -87,12 +87,12 @@ export default {
 }
 
 .error {
-  color: #991b1b;
+  color: var(--danger-text);
   margin: 14px 0;
   padding: 14px;
-  border: 1px solid #fecaca;
+  border: 1px solid var(--danger-border);
   border-radius: 10px;
-  background: #fef2f2;
+  background: var(--danger-bg);
 }
 
 .assets-list {
@@ -115,8 +115,8 @@ export default {
 }
 
 .asset-item:hover {
-  border-color: #9ca3af;
-  background: #f3f4f6;
+  border-color: #52647f;
+  background: var(--surface-hover);
   color: var(--text-primary);
 }
 

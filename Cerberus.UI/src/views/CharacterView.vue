@@ -600,8 +600,8 @@ h1 {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 2px solid #d1d5db;
-  border-top-color: #2563eb;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-blue);
   animation: loading-spin 0.8s linear infinite;
 }
 
@@ -614,9 +614,9 @@ h1 {
 .error {
   padding: 14px;
   text-align: center;
-  color: #991b1b;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  color: var(--danger-text);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
   border-radius: 8px;
 }
 
@@ -640,7 +640,7 @@ h1 {
 }
 
 .section-header:hover {
-  background: #f3f4f6;
+  background: var(--surface-hover);
 }
 
 .section-header h3 {
@@ -661,9 +661,9 @@ h1 {
   height: 20px;
   padding: 0 6px;
   border-radius: 999px;
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
-  color: #1e3a8a;
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  color: var(--info-text);
   font-size: 0.8rem;
   letter-spacing: 0;
   font-weight: 700;
@@ -677,7 +677,7 @@ h1 {
 
 .section-content {
   padding: 12px;
-  background: #ffffff;
+  background: var(--panel-bg);
 }
 
 .asset-filters {
@@ -709,7 +709,7 @@ h1 {
 .filter-input,
 .filter-select {
   padding: 6px 8px;
-  background: #ffffff;
+  background: var(--input-bg);
   border: 1px solid var(--border-color);
   border-radius: 4px;
   color: var(--text-primary);
@@ -721,12 +721,12 @@ h1 {
 .filter-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.45);
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
 }
 
 .filter-select option {
-  background: #ffffff;
+  background: var(--input-bg);
   color: var(--text-primary);
 }
 
@@ -745,8 +745,8 @@ table {
 }
 
 thead {
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--table-head-bg);
+  color: var(--table-head-text);
 }
 
 th {
@@ -766,7 +766,7 @@ td {
 }
 
 tr:hover {
-  background-color: #f9fafb;
+  background-color: var(--surface-hover);
 }
 
 .wallet-table {
@@ -795,15 +795,15 @@ tr:hover {
 }
 
 .wallet-side-buy {
-  color: #b91c1c;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
+  color: #fecaca;
+  background: #31181d;
+  border: 1px solid #6d3038;
 }
 
 .wallet-side-sell {
-  color: #166534;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
+  color: #bbf7d0;
+  background: #11251a;
+  border: 1px solid #264a34;
 }
 
 .wallet-table .wallet-item-col {
@@ -840,8 +840,8 @@ tr:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #e5e7eb;
-  border: 1px solid #d1d5db;
+  background-color: #243040;
+  border: 1px solid #334155;
   transition: 0.2s;
   border-radius: 999px;
 }
@@ -853,28 +853,28 @@ tr:hover {
   width: 14px;
   left: 2px;
   top: 2px;
-  background-color: #b9c8d6;
+  background-color: #94a3b8;
   transition: 0.2s;
   border-radius: 50%;
 }
 
 .track-switch input:checked + .track-slider {
-  background-color: #bfdbfe;
-  border-color: #93c5fd;
+  background-color: #1e3a5f;
+  border-color: var(--accent-blue);
 }
 
 .track-switch input:checked + .track-slider:before {
   transform: translateX(18px);
-  background-color: #1d4ed8;
+  background-color: var(--accent-blue);
 }
 
 .profit-positive {
-  color: #44d17a;
+  color: #86efac;
   font-weight: 700;
 }
 
 .profit-negative {
-  color: #ff6b6b;
+  color: #fca5a5;
   font-weight: 700;
 }
 

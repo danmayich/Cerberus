@@ -94,12 +94,12 @@ export default {
   margin-top: 14px;
   padding: 12px 16px;
   border-radius: 10px;
-  border: 1px solid #bbf7d0;
-  color: #166534;
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #f0fdf4;
+  background: var(--success-bg);
 }
 
 .status-dot {
