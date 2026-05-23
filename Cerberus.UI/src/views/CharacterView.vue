@@ -269,12 +269,27 @@
           <span class="toggle-icon">{{ sectionStates.transactionGroups ? '▼' : '▶' }}</span>
         </div>
         <div v-show="sectionStates.transactionGroups" class="section-content">
-          <div v-if="Object.keys(character.transactionGroups).length > 0" class="transaction-groups-container">
-            <TransactionGroupDetails
-              v-for="(group, id) in character.transactionGroups"
-              :key="id"
-              :group="group"
-            />
+          <div v-if="transactionGroupCount > 0">
+            <div class="table-container">
+              <table class="wallet-table">
+                <thead>
+                  <tr>
+                    <th class="wallet-item-col">Item</th>
+                    <th>Total Amount</th>
+                    <th>Average Cost</th>
+                    <th>Total Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="group in trackedTransactionGroups" :key="group._rowKey">
+                    <td class="wallet-item-col">{{ group.itemName }}</td>
+                    <td>{{ formatNumber(group.totalTrackedQuantity) }}</td>
+                    <td>{{ formatCurrency(group.averageTrackedPrice) }}</td>
+                    <td>{{ formatCurrency(group.totalTrackedAssetPrice) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <p v-else>No transaction groups found</p>
         </div>
@@ -285,14 +300,10 @@
 
 <script>
 import { useCharacterStore } from '../stores/character'
-import TransactionGroupDetails from '../components/TransactionGroupDetails.vue'
 import characterService from '../services/character.service'
 
 export default {
   name: 'CharacterView',
-  components: {
-    TransactionGroupDetails
-  },
   setup() {
     const characterStore = useCharacterStore()
     return { characterStore }
@@ -434,6 +445,16 @@ export default {
       return Array.from(transactionMap.values())
         .filter(transaction => this.isPositionTracked(transaction._rowKey))
         .sort((a, b) => new Date(b.date) - new Date(a.date))
+    },
+    trackedTransactionGroups() {
+      return Object.entries(this.character?.transactionGroups || {})
+        .filter(([, group]) => !!group)
+        .map(([typeId, group]) => ({
+          ...group,
+          itemName: group.itemName || `Type ${typeId}`,
+          _rowKey: `${typeId}`
+        }))
+        .sort((a, b) => (b.totalTrackedAssetPrice || 0) - (a.totalTrackedAssetPrice || 0))
     }
   },
   methods: {
@@ -899,12 +920,6 @@ tr:hover {
 .track-switch input:checked + .track-slider:before {
   transform: translateX(18px);
   background-color: var(--secondary-color);
-}
-
-.transaction-groups-container {
-  display: grid;
-  gap: 0.9rem;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
 @media (max-width: 768px) {
