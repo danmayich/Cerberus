@@ -59,18 +59,11 @@ export default {
 
 <style scoped>
 .wallet-transaction {
-  background: linear-gradient(135deg, rgba(0, 153, 255, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
-  border: 2px solid var(--accent-blue);
+  background: var(--panel-bg-soft);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 1rem;
   overflow: hidden;
-  box-shadow: 0 0 15px rgba(0, 153, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.wallet-transaction:hover {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 25px rgba(0, 212, 255, 0.4);
 }
 
 .transaction-header {
@@ -78,8 +71,8 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 2px solid var(--accent-blue);
-  background: linear-gradient(90deg, rgba(0, 153, 255, 0.15) 0%, rgba(0, 212, 255, 0.05) 100%);
+  border-bottom: 1px solid var(--border-color);
+  background: #ffffff;
 }
 
 .transaction-main {
@@ -89,42 +82,36 @@ export default {
 }
 
 .transaction-type {
-  font-weight: bold;
+  font-weight: 700;
   padding: 0.5rem 1rem;
   border-radius: 4px;
-  text-transform: uppercase;
+  text-transform: capitalize;
   font-size: 0.85em;
   white-space: nowrap;
-  letter-spacing: 1px;
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  letter-spacing: 0.4px;
 }
 
 .item-name {
   font-weight: 600;
   font-size: 1.1rem;
-  color: var(--secondary-color);
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-  letter-spacing: 1px;
+  color: var(--text-primary);
 }
 
 .transaction-buy .transaction-type {
-  background: linear-gradient(135deg, rgba(0, 255, 0, 0.2) 0%, rgba(0, 200, 0, 0.1) 100%);
-  color: #00ff00;
-  border: 2px solid #00ff00;
-  text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
 }
 
 .transaction-sell .transaction-type {
-  background: linear-gradient(135deg, rgba(255, 0, 0, 0.2) 0%, rgba(200, 0, 0, 0.1) 100%);
-  color: #ff4444;
-  border: 2px solid #ff4444;
-  text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
 }
 
 .transaction-date {
   color: var(--text-secondary);
   font-size: 0.9rem;
-  font-family: 'Courier New', monospace;
 }
 
 .details-grid {
@@ -138,36 +125,28 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 10px;
-  background: rgba(0, 153, 255, 0.05);
-  border-left: 3px solid var(--accent-blue);
+  background: #ffffff;
+  border-left: 3px solid #d1d5db;
   border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-.detail-item:hover {
-  background: rgba(0, 212, 255, 0.1);
-  border-left-color: var(--primary-color);
 }
 
 .detail-item label {
   font-size: 0.85rem;
   color: var(--text-secondary);
   margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.4px;
 }
 
 .detail-item span {
   font-weight: 600;
-  color: var(--primary-color);
-  font-family: 'Courier New', monospace;
+  color: var(--text-primary);
 }
 
 .transaction-buy {
-  border-left: 5px solid #00ff00;
+  border-left: 4px solid #16a34a;
 }
 
 .transaction-sell {
-  border-left: 5px solid #ff4444;
+  border-left: 4px solid #dc2626;
 }
 </style>
