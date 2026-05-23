@@ -129,12 +129,67 @@
           <span class="toggle-icon">{{ sectionStates.walletTransactions ? '▼' : '▶' }}</span>
         </div>
         <div v-show="sectionStates.walletTransactions" class="section-content">
-          <div v-if="Object.keys(character.walletTransactions).length > 0" class="wallet-transactions-container">
-            <WalletTransactionDetails
-              v-for="(transaction, id) in character.walletTransactions"
-              :key="id"
-              :transaction="transaction"
-            />
+          <div v-if="walletTransactionCount > 0">
+            <div class="asset-filters">
+              <div class="filter-group">
+                <label for="walletItemFilter">Filter by Item:</label>
+                <input
+                  id="walletItemFilter"
+                  v-model="walletFilters.itemFilter"
+                  type="text"
+                  placeholder="Search item..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="filter-group">
+                <label for="walletSideFilter">Filter by Side:</label>
+                <select id="walletSideFilter" v-model="walletFilters.sideFilter" class="filter-select">
+                  <option value="all">All</option>
+                  <option value="buy">Buy</option>
+                  <option value="sell">Sell</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="walletSortOrder">Sort by:</label>
+                <select id="walletSortOrder" v-model="walletFilters.sortOrder" class="filter-select">
+                  <option value="date-desc">Newest First</option>
+                  <option value="date-asc">Oldest First</option>
+                  <option value="value-desc">Highest Value</option>
+                  <option value="value-asc">Lowest Value</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="wallet-table">
+                <thead>
+                  <tr>
+                    <th class="wallet-side-col">Side</th>
+                    <th class="wallet-item-col">Item</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total Value</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="transaction in filteredWalletTransactions" :key="transaction._rowKey">
+                    <td class="wallet-side-col">
+                      <span
+                        class="wallet-side-badge"
+                        :class="transaction.isBuy ? 'wallet-side-buy' : 'wallet-side-sell'"
+                      >
+                        {{ transaction.isBuy ? 'Buy' : 'Sell' }}
+                      </span>
+                    </td>
+                    <td class="wallet-item-col">{{ transaction.itemName }}</td>
+                    <td>{{ formatNumber(transaction.quantity) }}</td>
+                    <td>{{ formatCurrency(transaction.unitPrice) }}</td>
+                    <td>{{ formatCurrency((transaction.unitPrice || 0) * (transaction.quantity || 0)) }}</td>
+                    <td>{{ formatShortDate(transaction.date) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <p v-else>No wallet transactions found</p>
         </div>
@@ -167,13 +222,11 @@
 <script>
 import { useCharacterStore } from '../stores/character'
 import TransactionGroupDetails from '../components/TransactionGroupDetails.vue'
-import WalletTransactionDetails from '../components/WalletTransactionDetails.vue'
 
 export default {
   name: 'CharacterView',
   components: {
-    TransactionGroupDetails,
-    WalletTransactionDetails
+    TransactionGroupDetails
   },
   setup() {
     const characterStore = useCharacterStore()
@@ -190,6 +243,11 @@ export default {
         nameFilter: '',
         locationFilter: '',
         sortOrder: 'none'
+      },
+      walletFilters: {
+        itemFilter: '',
+        sideFilter: 'all',
+        sortOrder: 'date-desc'
       }
     }
   },
@@ -241,6 +299,39 @@ export default {
       }
       
       return assets
+    },
+    filteredWalletTransactions() {
+      let transactions = Object.values(this.character?.walletTransactions || {})
+        .filter(transaction => !!transaction)
+        .map((transaction, index) => ({
+          ...transaction,
+          _rowKey: `${transaction.date || ''}-${transaction.itemName || ''}-${index}`
+        }))
+
+      if (this.walletFilters.itemFilter) {
+        const itemSearch = this.walletFilters.itemFilter.toLowerCase()
+        transactions = transactions.filter(transaction =>
+          (transaction.itemName || '').toString().toLowerCase().includes(itemSearch)
+        )
+      }
+
+      if (this.walletFilters.sideFilter === 'buy') {
+        transactions = transactions.filter(transaction => transaction.isBuy)
+      } else if (this.walletFilters.sideFilter === 'sell') {
+        transactions = transactions.filter(transaction => !transaction.isBuy)
+      }
+
+      if (this.walletFilters.sortOrder === 'date-asc') {
+        transactions.sort((a, b) => new Date(a.date) - new Date(b.date))
+      } else if (this.walletFilters.sortOrder === 'date-desc') {
+        transactions.sort((a, b) => new Date(b.date) - new Date(a.date))
+      } else if (this.walletFilters.sortOrder === 'value-asc') {
+        transactions.sort((a, b) => ((a.unitPrice || 0) * (a.quantity || 0)) - ((b.unitPrice || 0) * (b.quantity || 0)))
+      } else if (this.walletFilters.sortOrder === 'value-desc') {
+        transactions.sort((a, b) => ((b.unitPrice || 0) * (b.quantity || 0)) - ((a.unitPrice || 0) * (a.quantity || 0)))
+      }
+
+      return transactions
     }
   },
   methods: {
@@ -249,6 +340,23 @@ export default {
     },
     formatDate(dateString) {
       return new Date(dateString).toLocaleString()
+    },
+    formatShortDate(dateString) {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      })
+    },
+    formatNumber(value) {
+      return new Intl.NumberFormat().format(value)
+    },
+    formatCurrency(value) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value) + ' ISK'
     },
     async fetchCharacterData() {
       await this.characterStore.fetchCharacter()
@@ -560,16 +668,55 @@ tr:hover {
   background-color: rgba(0, 212, 255, 0.1);
 }
 
+.wallet-table {
+  table-layout: auto;
+}
+
+.wallet-table .wallet-side-col {
+  width: 1%;
+  white-space: nowrap;
+  text-align: center;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.wallet-side-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.wallet-side-buy {
+  color: #ff6b6b;
+  background: rgba(255, 0, 0, 0.12);
+  border: 1px solid rgba(255, 0, 0, 0.45);
+}
+
+.wallet-side-sell {
+  color: #59d98e;
+  background: rgba(0, 180, 0, 0.12);
+  border: 1px solid rgba(0, 180, 0, 0.45);
+}
+
+.wallet-table .wallet-item-col {
+  min-width: 340px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+}
+
 .transaction-groups-container {
   display: grid;
   gap: 0.9rem;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-}
-
-.wallet-transactions-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
 }
 
 @media (max-width: 768px) {
