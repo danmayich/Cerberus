@@ -3,7 +3,6 @@
     <div class="page-header">
       <div>
         <h1>Character Information</h1>
-        <p class="page-subtitle">Operational snapshot with compact section drill-downs.</p>
       </div>
       <div v-if="character" class="overview-stats">
         <div class="stat-chip">
@@ -34,31 +33,6 @@
     </div>
     
     <div v-else-if="character" class="character-data">
-      <div class="character-header">
-        <div class="character-header-content">
-          <img 
-            v-if="character.id" 
-            :src="`https://images.evetech.net/characters/${character.id}/portrait?tenant=tranquility&size=256`" 
-            :alt="`${character.characterInfo?.name || 'Character'} portrait`"
-            class="character-portrait"
-          />
-          <div class="character-info-section">
-            <h2>{{ character.characterInfo?.name || `Character ${character.id}` }}</h2>
-            <div v-if="character.characterInfo" class="character-details">
-              <p><strong>Character ID:</strong> {{ character.id }}</p>
-              <p v-if="character.characterInfo.corporationId"><strong>Corporation ID:</strong> {{ character.characterInfo.corporationId }}</p>
-              <p v-if="character.characterInfo.allianceId"><strong>Alliance ID:</strong> {{ character.characterInfo.allianceId }}</p>
-              <p v-if="character.characterInfo.securityStatus !== null && character.characterInfo.securityStatus !== undefined">
-                <strong>Security Status:</strong> {{ character.characterInfo.securityStatus.toFixed(2) }}
-              </p>
-              <p v-if="character.characterInfo.gender"><strong>Gender:</strong> {{ character.characterInfo.gender }}</p>
-              <p v-if="character.characterInfo.birthday"><strong>Birthday:</strong> {{ formatDate(character.characterInfo.birthday) }}</p>
-            </div>
-            <p class="last-updated">Last Updated: {{ formatDate(character.lastUpdated) }}</p>
-          </div>
-        </div>
-      </div>
-
       <!-- Assets Section -->
       <div class="section">
         <div class="section-header" @click="toggleSection('assets')">
@@ -270,6 +244,35 @@
         </div>
         <div v-show="sectionStates.transactionGroups" class="section-content">
           <div v-if="transactionGroupCount > 0">
+            <div class="asset-filters">
+              <div class="filter-group">
+                <label for="groupNameFilter">Filter by Name:</label>
+                <input
+                  id="groupNameFilter"
+                  v-model="transactionGroupFilters.nameFilter"
+                  type="text"
+                  placeholder="Search name..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="filter-group">
+                <label for="groupSortOrder">Sort by:</label>
+                <select id="groupSortOrder" v-model="transactionGroupFilters.sortOrder" class="filter-select">
+                  <option value="cost-desc">Highest Avg Cost</option>
+                  <option value="cost-asc">Lowest Avg Cost</option>
+                  <option value="total-desc">Highest Total Cost</option>
+                  <option value="total-asc">Lowest Total Cost</option>
+                  <option value="quantity-desc">Most Amount</option>
+                  <option value="quantity-asc">Least Amount</option>
+                  <option value="value-desc">Highest Market Value</option>
+                  <option value="value-asc">Lowest Market Value</option>
+                  <option value="profit-desc">Highest Profit</option>
+                  <option value="profit-asc">Lowest Profit</option>
+                  <option value="name-asc">Name A-Z</option>
+                  <option value="name-desc">Name Z-A</option>
+                </select>
+              </div>
+            </div>
             <div class="table-container">
               <table class="wallet-table">
                 <thead>
@@ -329,6 +332,10 @@ export default {
         itemFilter: '',
         sideFilter: 'all',
         sortOrder: 'date-desc'
+      },
+      transactionGroupFilters: {
+        nameFilter: '',
+        sortOrder: 'cost-desc'
       },
       trackedPositions: {},
       trackingInFlight: {}
@@ -451,14 +458,50 @@ export default {
         .sort((a, b) => new Date(b.date) - new Date(a.date))
     },
     trackedTransactionGroups() {
-      return Object.entries(this.character?.transactionGroups || {})
+      let groups = Object.entries(this.character?.transactionGroups || {})
         .filter(([, group]) => !!group)
         .map(([typeId, group]) => ({
           ...group,
           itemName: group.itemName || `Type ${typeId}`,
           _rowKey: `${typeId}`
         }))
-        .sort((a, b) => (b.totalTrackedAssetPrice || 0) - (a.totalTrackedAssetPrice || 0))
+
+      // Filter by name
+      if (this.transactionGroupFilters.nameFilter) {
+        const nameSearch = this.transactionGroupFilters.nameFilter.toLowerCase()
+        groups = groups.filter(group =>
+          (group.itemName || '').toString().toLowerCase().includes(nameSearch)
+        )
+      }
+
+      // Sort by selected column
+      if (this.transactionGroupFilters.sortOrder === 'name-asc') {
+        groups.sort((a, b) => (a.itemName || '').localeCompare(b.itemName || ''))
+      } else if (this.transactionGroupFilters.sortOrder === 'name-desc') {
+        groups.sort((a, b) => (b.itemName || '').localeCompare(a.itemName || ''))
+      } else if (this.transactionGroupFilters.sortOrder === 'quantity-asc') {
+        groups.sort((a, b) => (a.totalTrackedQuantity || 0) - (b.totalTrackedQuantity || 0))
+      } else if (this.transactionGroupFilters.sortOrder === 'quantity-desc') {
+        groups.sort((a, b) => (b.totalTrackedQuantity || 0) - (a.totalTrackedQuantity || 0))
+      } else if (this.transactionGroupFilters.sortOrder === 'cost-asc') {
+        groups.sort((a, b) => (a.averageTrackedPrice || 0) - (b.averageTrackedPrice || 0))
+      } else if (this.transactionGroupFilters.sortOrder === 'cost-desc') {
+        groups.sort((a, b) => (b.averageTrackedPrice || 0) - (a.averageTrackedPrice || 0))
+      } else if (this.transactionGroupFilters.sortOrder === 'total-asc') {
+        groups.sort((a, b) => (a.totalTrackedAssetPrice || 0) - (b.totalTrackedAssetPrice || 0))
+      } else if (this.transactionGroupFilters.sortOrder === 'total-desc') {
+        groups.sort((a, b) => (b.totalTrackedAssetPrice || 0) - (a.totalTrackedAssetPrice || 0))
+      } else if (this.transactionGroupFilters.sortOrder === 'value-asc') {
+        groups.sort((a, b) => (a.totalAssetValue || 0) - (b.totalAssetValue || 0))
+      } else if (this.transactionGroupFilters.sortOrder === 'value-desc') {
+        groups.sort((a, b) => (b.totalAssetValue || 0) - (a.totalAssetValue || 0))
+      } else if (this.transactionGroupFilters.sortOrder === 'profit-asc') {
+        groups.sort((a, b) => (a.totalProfit || 0) - (b.totalProfit || 0))
+      } else if (this.transactionGroupFilters.sortOrder === 'profit-desc') {
+        groups.sort((a, b) => (b.totalProfit || 0) - (a.totalProfit || 0))
+      }
+
+      return groups
     }
   },
   methods: {
@@ -615,69 +658,6 @@ h1 {
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
   text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-}
-
-.character-header {
-  margin-bottom: 1rem;
-  padding: 14px;
-  border: 1px solid var(--accent-blue);
-  border-radius: 8px;
-  background: linear-gradient(135deg, rgba(0, 153, 255, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
-  box-shadow: 0 0 12px rgba(0, 153, 255, 0.16);
-}
-
-.character-header-content {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-}
-
-.character-portrait {
-  width: 120px;
-  height: 120px;
-  border-radius: 10px;
-  border: 2px solid var(--primary-color);
-  box-shadow: 0 0 14px rgba(0, 212, 255, 0.35);
-  flex-shrink: 0;
-  object-fit: cover;
-}
-
-.character-info-section {
-  flex: 1;
-}
-
-.character-header h2 {
-  margin: 0;
-  color: var(--secondary-color);
-  font-size: 1.35rem;
-  line-height: 1.2;
-}
-
-.character-details {
-  margin: 10px 0;
-  padding: 10px 12px;
-  background: rgba(0, 0, 0, 0.24);
-  border-radius: 8px;
-  border-left: 2px solid var(--primary-color);
-}
-
-.character-details p {
-  margin: 5px 0;
-  color: var(--text-secondary);
-  font-size: 0.9em;
-}
-
-.character-details strong {
-  color: var(--primary-color);
-  margin-right: 8px;
-}
-
-.last-updated {
-  color: var(--text-secondary);
-  font-style: italic;
-  font-size: 0.85em;
-  letter-spacing: 0.5px;
-  margin-top: 8px;
 }
 
 .section {
@@ -960,16 +940,6 @@ tr:hover {
   .stat-chip {
     flex: 1;
     min-width: 0;
-  }
-
-  .character-header-content {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .character-portrait {
-    width: 92px;
-    height: 92px;
   }
 
   .section-header {
