@@ -168,6 +168,7 @@
                     <th>Quantity</th>
                     <th>Unit Price</th>
                     <th>Total Value</th>
+                    <th class="wallet-track-col">Track Position</th>
                     <th>Date</th>
                   </tr>
                 </thead>
@@ -185,6 +186,18 @@
                     <td>{{ formatNumber(transaction.quantity) }}</td>
                     <td>{{ formatCurrency(transaction.unitPrice) }}</td>
                     <td>{{ formatCurrency((transaction.unitPrice || 0) * (transaction.quantity || 0)) }}</td>
+                    <td class="wallet-track-col">
+                      <label class="track-switch" :for="`track-${transaction._rowKey}`">
+                        <input
+                          :id="`track-${transaction._rowKey}`"
+                          type="checkbox"
+                          :checked="isPositionTracked(transaction._rowKey)"
+                          :disabled="isTrackingInFlight(transaction._rowKey)"
+                          @change="setPositionTracking(transaction, $event.target.checked)"
+                        />
+                        <span class="track-slider"></span>
+                      </label>
+                    </td>
                     <td>{{ formatShortDate(transaction.date) }}</td>
                   </tr>
                 </tbody>
@@ -222,6 +235,7 @@
 <script>
 import { useCharacterStore } from '../stores/character'
 import TransactionGroupDetails from '../components/TransactionGroupDetails.vue'
+import characterService from '../services/character.service'
 
 export default {
   name: 'CharacterView',
@@ -248,7 +262,9 @@ export default {
         itemFilter: '',
         sideFilter: 'all',
         sortOrder: 'date-desc'
-      }
+      },
+      trackedPositions: {},
+      trackingInFlight: {}
     }
   },
   computed: {
@@ -357,6 +373,35 @@ export default {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }).format(value) + ' ISK'
+    },
+    isPositionTracked(rowKey) {
+      return !!this.trackedPositions[rowKey]
+    },
+    isTrackingInFlight(rowKey) {
+      return !!this.trackingInFlight[rowKey]
+    },
+    async setPositionTracking(transaction, isTracked) {
+      const rowKey = transaction?._rowKey
+      if (!rowKey) return
+
+      this.trackedPositions[rowKey] = isTracked
+
+      // Only send payload when enabling tracking.
+      if (!isTracked) {
+        return
+      }
+
+      this.trackingInFlight[rowKey] = true
+      try {
+        const payload = { ...transaction }
+        delete payload._rowKey
+        await characterService.trackPosition(payload)
+      } catch (error) {
+        console.error('Failed to track position:', error)
+        this.trackedPositions[rowKey] = false
+      } finally {
+        this.trackingInFlight[rowKey] = false
+      }
     },
     async fetchCharacterData() {
       await this.characterStore.fetchCharacter()
@@ -711,6 +756,60 @@ tr:hover {
   overflow: visible;
   text-overflow: clip;
   word-break: break-word;
+}
+
+.wallet-track-col {
+  width: 1%;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.track-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+}
+
+.track-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.track-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  transition: 0.2s;
+  border-radius: 999px;
+}
+
+.track-slider:before {
+  position: absolute;
+  content: '';
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  top: 2px;
+  background-color: #b9c8d6;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+
+.track-switch input:checked + .track-slider {
+  background-color: rgba(0, 212, 255, 0.35);
+  border-color: rgba(0, 212, 255, 0.7);
+}
+
+.track-switch input:checked + .track-slider:before {
+  transform: translateX(18px);
+  background-color: var(--secondary-color);
 }
 
 .transaction-groups-container {

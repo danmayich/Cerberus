@@ -116,7 +116,7 @@ public class Program
                         context.Identity.AddClaim(new Claim("access_token", context.AccessToken));
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     throw;
                 }
@@ -132,18 +132,6 @@ public class Program
         var app = builder.Build();
 
         app.MapDefaultEndpoints();
-
-        app.Use(async (context, next) =>
-        {
-            if (context.Request.Method == HttpMethods.Options)
-            {
-                context.Response.StatusCode = StatusCodes.Status204NoContent;
-                await context.Response.CompleteAsync();
-                return;
-            }
-
-            await next();
-        });
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

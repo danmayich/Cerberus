@@ -56,6 +56,15 @@ const characterService = {
             console.error('CharacterService: Error fetching character:', error);
             throw error;
         }
+    },
+
+    async trackPosition(transaction) {
+        try {
+            return await apiService.post('Character/track-position', transaction);
+        } catch (error) {
+            console.error('CharacterService: Error tracking position:', error);
+            throw error;
+        }
     }
 };
 

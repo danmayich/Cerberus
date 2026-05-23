@@ -26,14 +26,39 @@ namespace Cerberus.Api.Controllers.Authentication
             return character;
         }
 
+        [Authorize]
+        [HttpPost("track-position")]
+        public IActionResult TrackPosition([FromBody] EsiWalletTransaction transaction)
+        {
+            if (transaction is null)
+            {
+                return BadRequest("Transaction payload is required.");
+            }
+
+            // Placeholder endpoint: payload reaches server and can be persisted/processed next.
+            return Ok(new
+            {
+                tracked = true,
+                transactionId = transaction.TransactionId,
+                itemName = transaction.ItemName,
+                date = transaction.Date
+            });
+        }
+
         private (long charId, string accessToken, string refreshToken) GetTokens()
         {
-            var charId = long.Parse(User.FindFirstValue("character_id")!);
+            var charIdClaim = User.FindFirstValue("character_id");
+            if (string.IsNullOrWhiteSpace(charIdClaim) || !long.TryParse(charIdClaim, out var charId))
+                throw new UnauthorizedAccessException("Missing or invalid character_id claim");
+
             var accessToken = User.FindFirst("access_token")?.Value; // depends on your setup
-            var refreshToken = User.FindFirst("refresh_token")!.Value;
+            var refreshToken = User.FindFirst("refresh_token")?.Value;
 
             if (string.IsNullOrEmpty(accessToken))
                 throw new UnauthorizedAccessException("Missing access token");
+
+            if (string.IsNullOrEmpty(refreshToken))
+                throw new UnauthorizedAccessException("Missing refresh token");
 
             return (charId, accessToken, refreshToken);
         }
