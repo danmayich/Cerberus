@@ -6,8 +6,9 @@
       </div>
     </div>
     
-    <div v-if="loading" class="loading">
-      Loading character data...
+    <div v-if="loading" class="loading" role="status" aria-live="polite">
+      <span class="loading-spinner" aria-hidden="true"></span>
+      <span>Loading character information...</span>
     </div>
     
     <div v-else-if="error" class="error">
@@ -585,12 +586,29 @@ h1 {
 
 .loading {
   padding: 20px;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   color: var(--text-secondary);
   font-size: 1rem;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--panel-bg-soft);
+}
+
+.loading-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  border-top-color: #2563eb;
+  animation: loading-spin 0.8s linear infinite;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .error {
