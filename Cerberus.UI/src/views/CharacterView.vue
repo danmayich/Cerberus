@@ -18,6 +18,10 @@
           <span class="stat-label">Groups</span>
           <span class="stat-value">{{ transactionGroupCount }}</span>
         </div>
+        <div class="stat-chip">
+          <span class="stat-label">Tracked</span>
+          <span class="stat-value">{{ trackedPositionCount }}</span>
+        </div>
       </div>
     </div>
     
@@ -208,6 +212,53 @@
         </div>
       </div>
 
+      <!-- Tracked Positions Section -->
+      <div class="section">
+        <div class="section-header" @click="toggleSection('trackedPositions')">
+          <h3>
+            <span>Tracked Positions</span>
+            <span class="section-count">{{ trackedPositionCount }}</span>
+          </h3>
+          <span class="toggle-icon">{{ sectionStates.trackedPositions ? '▼' : '▶' }}</span>
+        </div>
+        <div v-show="sectionStates.trackedPositions" class="section-content">
+          <div v-if="trackedPositionCount > 0">
+            <div class="table-container">
+              <table class="wallet-table">
+                <thead>
+                  <tr>
+                    <th class="wallet-side-col">Side</th>
+                    <th class="wallet-item-col">Item</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total Value</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="transaction in trackedWalletTransactions" :key="`tracked-${transaction._rowKey}`">
+                    <td class="wallet-side-col">
+                      <span
+                        class="wallet-side-badge"
+                        :class="transaction.isBuy ? 'wallet-side-buy' : 'wallet-side-sell'"
+                      >
+                        {{ transaction.isBuy ? 'Buy' : 'Sell' }}
+                      </span>
+                    </td>
+                    <td class="wallet-item-col">{{ transaction.itemName }}</td>
+                    <td>{{ formatNumber(transaction.quantity) }}</td>
+                    <td>{{ formatCurrency(transaction.unitPrice) }}</td>
+                    <td>{{ formatCurrency((transaction.unitPrice || 0) * (transaction.quantity || 0)) }}</td>
+                    <td>{{ formatShortDate(transaction.date) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <p v-else>No tracked positions found</p>
+        </div>
+      </div>
+
       <!-- Transaction Groups Section -->
       <div class="section">
         <div class="section-header" @click="toggleSection('transactionGroups')">
@@ -251,6 +302,7 @@ export default {
       sectionStates: {
         assets: false,
         walletTransactions: false,
+        trackedPositions: false,
         transactionGroups: false
       },
       assetFilters: {
@@ -282,6 +334,9 @@ export default {
     },
     walletTransactionCount() {
       return Object.keys(this.character?.walletTransactions || {}).length
+    },
+    trackedPositionCount() {
+      return this.trackedWalletTransactions.length
     },
     transactionGroupCount() {
       return Object.keys(this.character?.transactionGroups || {}).length
@@ -348,6 +403,37 @@ export default {
       }
 
       return transactions
+    },
+    trackedWalletTransactions() {
+      const persistedTracked = Object.values(this.character?.trackedPositions || {})
+        .filter(transaction => !!transaction)
+        .map((transaction, index) => ({
+          ...transaction,
+          _rowKey: `${transaction.transactionId ?? `persisted-${index}`}`
+        }))
+
+      const walletTransactions = Object.values(this.character?.walletTransactions || {})
+        .filter(transaction => !!transaction)
+        .map((transaction, index) => ({
+          ...transaction,
+          _rowKey: `${transaction.transactionId ?? index}`
+        }))
+
+      const transactionMap = new Map()
+
+      for (const transaction of persistedTracked) {
+        transactionMap.set(transaction._rowKey, transaction)
+      }
+
+      for (const transaction of walletTransactions) {
+        if (this.isPositionTracked(transaction._rowKey)) {
+          transactionMap.set(transaction._rowKey, transaction)
+        }
+      }
+
+      return Array.from(transactionMap.values())
+        .filter(transaction => this.isPositionTracked(transaction._rowKey))
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
     }
   },
   methods: {
