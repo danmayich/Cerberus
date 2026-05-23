@@ -93,15 +93,23 @@ namespace Cerberus.Application
         private void AddItemNamesToTransactionGroups(CharacterDto character)
         {
             var assetNamesDict = ParseCsvToDictionary();
-            foreach (var transactionGroup in character.TransactionGroups)
+            try
             {
-                transactionGroup.Value.ItemName = assetNamesDict[transactionGroup.Key];
+                foreach (var transactionGroup in character.TransactionGroups)
+                {
+                    transactionGroup.Value.ItemName = assetNamesDict[transactionGroup.Key];
+                }
+
+                foreach (var walletTransaction in character.WalletTransactions)
+                {
+                    walletTransaction.Value.ItemName = assetNamesDict[walletTransaction.Value.TypeId];
+                }
+            }
+            catch (Exception ex)
+            {
+                //TODO what causes this
             }
 
-            foreach (var walletTransaction in character.WalletTransactions)
-            {
-                walletTransaction.Value.ItemName = assetNamesDict[walletTransaction.Value.TypeId];
-            }
         }
 
         /// <summary>

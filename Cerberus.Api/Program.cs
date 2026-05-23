@@ -22,7 +22,7 @@ public class Program
 
         // Allowed frontend origins (adjust ports to match where your Vue dev server runs)
         var allowedOrigins = new[] {
-    "http://localhost:8081",    // Vue dev server (adjust if different)
+    "http://localhost:8080",    // Vue dev server (adjust if different)
     "https://localhost:44328",  // IIS Express (if you run via IIS Express)
     "https://localhost:7283"    // Project https port (if you run via dotnet run)
 };
@@ -45,16 +45,6 @@ public class Program
     ?? throw new InvalidOperationException("CerberusSettings configuration is missing.");
 
         builder.Services.AddSingleton(settings);
-
-        //var settings = new CerberusSettings()
-        //{
-        //    ESISettings = new ESISettings()
-        //    {
-        //        ClientId = "40f15c65c0004e2e87bc75bbeabb3301",
-        //        ClientSecret = "eat_1ZchAA3ww6Vpvh0r8BVzegv7WYYd65AaY_SQU5E"
-        //    }
-        //};
-
         builder.Services.AddHttpClient<EsiClient>();
         builder.Services.AddSingleton(settings);
 
@@ -91,13 +81,6 @@ public class Program
 
             options.CallbackPath = "/signin-oidc";
         
-            // Do NOT use the default OIDC config (forces "openid")
-            //options.Configuration = new Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration
-            //{
-            //    AuthorizationEndpoint = "https://login.eveonline.com/v2/oauth/authorize",
-            //    TokenEndpoint = "https://login.eveonline.com/v2/oauth/token"
-            //};
-        
             // Now you control scopes completely
             options.Scope.Clear();
             options.Scope.Add("esi-wallet.read_character_wallet.v1");
@@ -109,26 +92,35 @@ public class Program
 
             options.Events.OnCreatingTicket = async context =>
             {
-                var http = new HttpClient();
-                http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", context.AccessToken);
-
-                var res = await http.GetStringAsync("https://esi.evetech.net/verify/");
-                var verify = JsonDocument.Parse(res).RootElement;
-
-                var charId = verify.GetProperty("CharacterID").GetInt64().ToString();
-                var charName = verify.GetProperty("CharacterName").GetString();
-
-                context.Identity!.AddClaim(new Claim("character_id", charId));
-                context.Identity.AddClaim(new Claim("character_name", charName ?? ""));
-
-                if (!string.IsNullOrEmpty(context.RefreshToken))
-                    context.Identity.AddClaim(new Claim("refresh_token", context.RefreshToken));
-
-                if (!string.IsNullOrEmpty(context.AccessToken))
+                try
                 {
-                    context.Identity.AddClaim(new Claim("access_token", context.AccessToken));
+                    var http = new HttpClient();
+                    http.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue("Bearer", context.AccessToken);
+
+                    // CCP changed this shit wtf
+                    var res = await http.GetStringAsync("https://login.eveonline.com/v2/oauth/verify/");
+                    var verify = JsonDocument.Parse(res).RootElement;
+
+                    var charId = verify.GetProperty("CharacterID").GetInt64().ToString();
+                    var charName = verify.GetProperty("CharacterName").GetString();
+
+                    context.Identity!.AddClaim(new Claim("character_id", charId));
+                    context.Identity.AddClaim(new Claim("character_name", charName ?? ""));
+
+                    if (!string.IsNullOrEmpty(context.RefreshToken))
+                        context.Identity.AddClaim(new Claim("refresh_token", context.RefreshToken));
+
+                    if (!string.IsNullOrEmpty(context.AccessToken))
+                    {
+                        context.Identity.AddClaim(new Claim("access_token", context.AccessToken));
+                    }
                 }
+                catch (Exception ex)
+                {
+                    throw;
+                }
+
             };
         });
 
