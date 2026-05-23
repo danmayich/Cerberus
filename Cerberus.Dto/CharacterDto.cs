@@ -28,6 +28,11 @@ namespace Cerberus.Dto
         /// </summary>
         public Dictionary<long, EsiWalletTransaction> WalletTransactions { get; set; } = new Dictionary<long, EsiWalletTransaction>();
 
+        /// <summary>
+        /// Wallet transactions explicitly selected for position tracking.
+        /// </summary>
+        public Dictionary<long, EsiWalletTransaction> TrackedPositions { get; set; } = new Dictionary<long, EsiWalletTransaction>();
+
         public Dictionary<long, TransactionGroup> TransactionGroups { get; set; } = new Dictionary<long, TransactionGroup>();
 
         public Dictionary<long, WalletJournalEntry> WalletJournalEntries { get; set; } = new Dictionary<long, WalletJournalEntry>();

@@ -35,13 +35,29 @@ namespace Cerberus.Api.Controllers.Authentication
                 return BadRequest("Transaction payload is required.");
             }
 
-            // Placeholder endpoint: payload reaches server and can be persisted/processed next.
+            var (charId, _, _) = GetTokens();
+            characterApplication.TrackPosition(charId, transaction);
+
             return Ok(new
             {
                 tracked = true,
                 transactionId = transaction.TransactionId,
                 itemName = transaction.ItemName,
                 date = transaction.Date
+            });
+        }
+
+        [Authorize]
+        [HttpDelete("track-position/{transactionId:long}")]
+        public IActionResult UntrackPosition([FromRoute] long transactionId)
+        {
+            var (charId, _, _) = GetTokens();
+            characterApplication.UntrackPosition(charId, transactionId);
+
+            return Ok(new
+            {
+                tracked = false,
+                transactionId
             });
         }
 

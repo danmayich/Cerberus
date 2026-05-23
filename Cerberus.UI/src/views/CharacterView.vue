@@ -321,7 +321,7 @@ export default {
         .filter(transaction => !!transaction)
         .map((transaction, index) => ({
           ...transaction,
-          _rowKey: `${transaction.date || ''}-${transaction.itemName || ''}-${index}`
+          _rowKey: `${transaction.transactionId ?? index}`
         }))
 
       if (this.walletFilters.itemFilter) {
@@ -375,7 +375,11 @@ export default {
       }).format(value) + ' ISK'
     },
     isPositionTracked(rowKey) {
-      return !!this.trackedPositions[rowKey]
+      if (this.trackedPositions[rowKey] !== undefined) {
+        return !!this.trackedPositions[rowKey]
+      }
+
+      return !!this.character?.trackedPositions?.[rowKey]
     },
     isTrackingInFlight(rowKey) {
       return !!this.trackingInFlight[rowKey]
@@ -386,19 +390,18 @@ export default {
 
       this.trackedPositions[rowKey] = isTracked
 
-      // Only send payload when enabling tracking.
-      if (!isTracked) {
-        return
-      }
-
       this.trackingInFlight[rowKey] = true
       try {
-        const payload = { ...transaction }
-        delete payload._rowKey
-        await characterService.trackPosition(payload)
+        if (isTracked) {
+          const payload = { ...transaction }
+          delete payload._rowKey
+          await characterService.trackPosition(payload)
+        } else {
+          await characterService.untrackPosition(transaction.transactionId)
+        }
       } catch (error) {
-        console.error('Failed to track position:', error)
-        this.trackedPositions[rowKey] = false
+        console.error('Failed to update tracked position:', error)
+        this.trackedPositions[rowKey] = !isTracked
       } finally {
         this.trackingInFlight[rowKey] = false
       }

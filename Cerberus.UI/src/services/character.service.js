@@ -60,9 +60,32 @@ const characterService = {
 
     async trackPosition(transaction) {
         try {
-            return await apiService.post('Character/track-position', transaction);
+            const payload = {
+                transaction_id: transaction.transactionId,
+                client_id: transaction.clientId,
+                date: transaction.date,
+                is_buy: transaction.isBuy,
+                is_personal: transaction.isPersonal,
+                journal_ref_id: transaction.journalRefId,
+                location_id: transaction.locationId,
+                quantity: transaction.quantity,
+                type_id: transaction.typeId,
+                unit_price: transaction.unitPrice,
+                item_name: transaction.itemName
+            };
+
+            return await apiService.post('Character/track-position', payload);
         } catch (error) {
             console.error('CharacterService: Error tracking position:', error);
+            throw error;
+        }
+    },
+
+    async untrackPosition(transactionId) {
+        try {
+            return await apiService.delete(`Character/track-position/${transactionId}`);
+        } catch (error) {
+            console.error('CharacterService: Error untracking position:', error);
             throw error;
         }
     }

@@ -7,13 +7,38 @@ namespace Cerberus.Application
 {
     public class CharacterApplication(CharacterRepository characterRepository, AssetRetrievalApplication assetRetrievalApplication, WalletApplication walletApplication, EsiClient esiClient)
     {
+        public void TrackPosition(long characterId, EsiWalletTransaction transaction)
+        {
+            if (transaction is null)
+            {
+                throw new ArgumentNullException(nameof(transaction));
+            }
+
+            var character = characterRepository.GetById(characterId);
+            character.TrackedPositions ??= new Dictionary<long, EsiWalletTransaction>();
+            character.TrackedPositions[transaction.TransactionId] = transaction;
+            characterRepository.Save(character);
+        }
+
+        public void UntrackPosition(long characterId, long transactionId)
+        {
+            var character = characterRepository.GetById(characterId);
+            if (character.TrackedPositions is null)
+            {
+                return;
+            }
+
+            character.TrackedPositions.Remove(transactionId);
+            characterRepository.Save(character);
+        }
+
         public async Task<CharacterDto> LoadCharacter(long id, string accessToken)
         {
             var character = characterRepository.GetById(id);
 
             // Only update info once an hour
-            //if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
-            //{
+            if (DateTime.UtcNow.AddHours(-1) > character.LastUpdated)
+            {
                 // fetch and attach character info
                 try
                 {
@@ -64,7 +89,7 @@ namespace Cerberus.Application
                 UpdateTotalAssetQuantities(character);
 
                 await UpdateTotalTrackedAssetValue(character, accessToken);
-            //}
+            }
 
             characterRepository.Save(character);
 

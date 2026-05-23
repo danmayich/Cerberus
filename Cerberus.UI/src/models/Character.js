@@ -15,6 +15,7 @@ export default class Character {
 
         // walletTransactions and transactionGroups may be objects keyed by id
         this.walletTransactions = data.walletTransactions ?? data.wallet_transactions ?? {};
+        this.trackedPositions = data.trackedPositions ?? data.tracked_positions ?? {};
         this.transactionGroups = data.transactionGroups ?? data.transaction_groups ?? {};
 
         // assets: convert to Asset instances
@@ -33,6 +34,7 @@ export default class Character {
             characterInfo: this.characterInfo,
             assets: this.assets.map(a => a.toPlain()),
             walletTransactions: this.walletTransactions,
+            trackedPositions: this.trackedPositions,
             transactionGroups: this.transactionGroups,
             _raw: this._raw
         };
