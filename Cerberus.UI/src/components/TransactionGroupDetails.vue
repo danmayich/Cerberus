@@ -16,6 +16,10 @@
         <label>Total Cost:</label>
         <span>{{ formatCurrency(group.totalTrackedAssetPrice) }}</span>
       </div>
+      <div class="detail-item">
+        <label>Profit %:</label>
+        <span>{{ formatPercentage(resolveProfitPercent(group)) }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -39,6 +43,31 @@ export default {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
       }).format(value) + ' ISK'
+    },
+    formatPercentage(value) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
+        return 'N/A'
+      }
+
+      return new Intl.NumberFormat('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+        signDisplay: 'always'
+      }).format(value) + '%'
+    },
+    resolveProfitPercent(group) {
+      if (group?.totalProfitPercent !== null && group?.totalProfitPercent !== undefined && !Number.isNaN(group.totalProfitPercent)) {
+        return group.totalProfitPercent
+      }
+
+      const totalCost = group?.totalTrackedAssetPrice || 0
+      if (totalCost <= 0) {
+        return null
+      }
+
+      const profit = group?.totalProfit || 0
+      return (profit / totalCost) * 100
     }
   }
 }

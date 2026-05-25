@@ -266,6 +266,7 @@
                     <th>Total Cost</th>
                     <th>Current Market Value</th>
                     <th>Profit</th>
+                    <th>Profit %</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -276,6 +277,7 @@
                     <td>{{ formatCurrency(group.totalTrackedAssetPrice) }}</td>
                     <td>{{ formatCurrency(group.totalAssetValue) }}</td>
                     <td :class="profitCellClass(group.totalProfit)">{{ formatCurrency(group.totalProfit) }}</td>
+                    <td :class="profitCellClass(resolveProfitPercent(group))">{{ formatPercentage(resolveProfitPercent(group)) }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -511,7 +513,36 @@ export default {
         maximumFractionDigits: 2
       }).format(value) + ' ISK'
     },
+    formatPercentage(value) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
+        return 'N/A'
+      }
+
+      return new Intl.NumberFormat('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+        signDisplay: 'always'
+      }).format(value) + '%'
+    },
+    resolveProfitPercent(group) {
+      if (group?.totalProfitPercent !== null && group?.totalProfitPercent !== undefined && !Number.isNaN(group.totalProfitPercent)) {
+        return group.totalProfitPercent
+      }
+
+      const totalCost = group?.totalTrackedAssetPrice || 0
+      if (totalCost <= 0) {
+        return null
+      }
+
+      const profit = group?.totalProfit || 0
+      return (profit / totalCost) * 100
+    },
     profitCellClass(value) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
+        return 'profit-neutral'
+      }
+
       return value >= 0 ? 'profit-positive' : 'profit-negative'
     },
     isPositionTracked(rowKey) {
@@ -875,6 +906,11 @@ tr:hover {
 
 .profit-negative {
   color: #fca5a5;
+  font-weight: 700;
+}
+
+.profit-neutral {
+  color: var(--text-secondary);
   font-weight: 700;
 }
 
