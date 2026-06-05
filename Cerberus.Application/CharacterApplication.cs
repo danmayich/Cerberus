@@ -7,6 +7,8 @@ namespace Cerberus.Application
 {
     public class CharacterApplication(CharacterRepository characterRepository, AssetRetrievalApplication assetRetrievalApplication, WalletApplication walletApplication, EsiClient esiClient)
     {
+        private const decimal TransactionGroupTaxRate = 0.03375m;
+
         public async Task<Dictionary<long, TransactionGroup>> TrackPosition(long characterId, EsiWalletTransaction transaction, string accessToken)
         {
             if (transaction is null)
@@ -117,12 +119,14 @@ namespace Cerberus.Application
                 if (latestBuyOrder is null)
                 {
                     group.TotalAssetValue = 0;
+                    group.TotalTax = 0;
                     group.TotalProfit = -group.TotalTrackedAssetPrice;
                     continue;
                 }
 
                 group.TotalAssetValue = latestBuyOrder.Price * group.TotalTrackedQuantity;
-                group.TotalProfit = group.TotalAssetValue - group.TotalTrackedAssetPrice;
+                group.TotalTax = group.TotalAssetValue * TransactionGroupTaxRate;
+                group.TotalProfit = group.TotalAssetValue - group.TotalTrackedAssetPrice - group.TotalTax;
             }
         }
 

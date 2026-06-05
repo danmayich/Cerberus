@@ -17,6 +17,10 @@
         <span>{{ formatCurrency(group.totalTrackedAssetPrice) }}</span>
       </div>
       <div class="detail-item">
+        <label>Tax:</label>
+        <span>{{ formatCurrency(group.totalTax) }}</span>
+      </div>
+      <div class="detail-item">
         <label>Profit %:</label>
         <span>{{ formatPercentage(resolveProfitPercent(group)) }}</span>
       </div>

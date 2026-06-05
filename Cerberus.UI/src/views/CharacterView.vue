@@ -265,6 +265,7 @@
                     <th>Average Cost</th>
                     <th>Total Cost</th>
                     <th>Current Market Value</th>
+                    <th>Tax</th>
                     <th>Profit</th>
                     <th>Profit %</th>
                   </tr>
@@ -276,6 +277,7 @@
                     <td>{{ formatCurrency(group.averageTrackedPrice) }}</td>
                     <td>{{ formatCurrency(group.totalTrackedAssetPrice) }}</td>
                     <td>{{ formatCurrency(group.totalAssetValue) }}</td>
+                    <td>{{ formatCurrency(group.totalTax) }}</td>
                     <td :class="profitCellClass(group.totalProfit)">{{ formatCurrency(group.totalProfit) }}</td>
                     <td :class="profitCellClass(resolveProfitPercent(group))">{{ formatPercentage(resolveProfitPercent(group)) }}</td>
                   </tr>
