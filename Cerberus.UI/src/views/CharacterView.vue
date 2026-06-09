@@ -153,7 +153,7 @@
                           :id="`track-${transaction._rowKey}`"
                           type="checkbox"
                           :checked="isPositionTracked(transaction._rowKey)"
-                          :disabled="isTrackingInFlight(transaction._rowKey)"
+                          :disabled="trackingRequestInFlight || isTrackingInFlight(transaction._rowKey)"
                           @change="setPositionTracking(transaction, $event.target.checked)"
                         />
                         <span class="track-slider"></span>
@@ -325,7 +325,8 @@ export default {
         sortOrder: 'cost-desc'
       },
       trackedPositions: {},
-      trackingInFlight: {}
+      trackingInFlight: {},
+      trackingRequestInFlight: false
     }
   },
   computed: {
@@ -561,9 +562,15 @@ export default {
       const rowKey = transaction?._rowKey
       if (!rowKey) return
 
+      // Only allow one tracking mutation at a time across the whole table.
+      if (this.trackingRequestInFlight && !this.trackingInFlight[rowKey]) {
+        return
+      }
+
       this.trackedPositions[rowKey] = isTracked
 
       this.trackingInFlight[rowKey] = true
+      this.trackingRequestInFlight = true
       try {
         let result
         if (isTracked) {
@@ -582,6 +589,7 @@ export default {
         this.trackedPositions[rowKey] = !isTracked
       } finally {
         this.trackingInFlight[rowKey] = false
+        this.trackingRequestInFlight = Object.values(this.trackingInFlight).some(Boolean)
       }
     },
     async fetchCharacterData() {
