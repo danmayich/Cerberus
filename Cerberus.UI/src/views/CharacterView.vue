@@ -148,16 +148,19 @@
                     <td>{{ formatCurrency(transaction.unitPrice) }}</td>
                     <td>{{ formatCurrency((transaction.unitPrice || 0) * (transaction.quantity || 0)) }}</td>
                     <td class="wallet-track-col">
-                      <label class="track-switch" :for="`track-${transaction._rowKey}`">
-                        <input
-                          :id="`track-${transaction._rowKey}`"
-                          type="checkbox"
-                          :checked="isPositionTracked(transaction._rowKey)"
-                          :disabled="trackingRequestInFlight || isTrackingInFlight(transaction._rowKey)"
-                          @change="setPositionTracking(transaction, $event.target.checked)"
-                        />
-                        <span class="track-slider"></span>
-                      </label>
+                      <div class="track-control">
+                        <label class="track-switch" :for="`track-${transaction._rowKey}`">
+                          <input
+                            :id="`track-${transaction._rowKey}`"
+                            type="checkbox"
+                            :checked="isPositionTracked(transaction._rowKey)"
+                            :disabled="trackingRequestInFlight || isTrackingInFlight(transaction._rowKey)"
+                            @change="setPositionTracking(transaction, $event.target.checked)"
+                          />
+                          <span class="track-slider"></span>
+                        </label>
+                        <span v-if="isTrackingInFlight(transaction._rowKey)" class="track-spinner" aria-hidden="true"></span>
+                      </div>
                     </td>
                     <td>{{ formatShortDate(transaction.date) }}</td>
                   </tr>
@@ -638,11 +641,14 @@ h1 {
 }
 
 .loading-spinner {
+  display: inline-block;
   width: 14px;
   height: 14px;
   border-radius: 50%;
   border: 2px solid var(--border-color);
   border-top-color: var(--accent-blue);
+  transform-origin: center center;
+  vertical-align: middle;
   animation: loading-spin 0.8s linear infinite;
 }
 
@@ -861,6 +867,14 @@ tr:hover {
   text-align: center;
 }
 
+.track-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+}
+
 .track-switch {
   position: relative;
   display: inline-block;
@@ -907,6 +921,28 @@ tr:hover {
 .track-switch input:checked + .track-slider:before {
   transform: translateX(18px);
   background-color: var(--accent-blue);
+}
+
+.track-spinner {
+  position: absolute;
+  right: -18px;
+  top: 50%;
+  transform: translateY(-50%) rotate(0deg);
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--accent-blue);
+  transform-origin: center center;
+  backface-visibility: hidden;
+  animation: loading-spin-track 0.8s linear infinite;
+}
+
+@keyframes loading-spin-track {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
 }
 
 .profit-positive {
